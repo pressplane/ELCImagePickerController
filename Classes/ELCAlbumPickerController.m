@@ -14,6 +14,9 @@
 
 @synthesize parent, assetGroups;
 
+@synthesize assetTablePicker;
+
+
 #pragma mark -
 #pragma mark View lifecycle
 
@@ -127,15 +130,19 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	
-	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
-	picker.parent = self;
+    ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
+    
+	self.assetTablePicker = tempAssetTablePicker;
+    [tempAssetTablePicker release];
+    
+	assetTablePicker.parent = self;
 
     // Move me    
-    picker.assetGroup = [assetGroups objectAtIndex:indexPath.row];
-    [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
+    assetTablePicker.assetGroup = [assetGroups objectAtIndex:indexPath.row];
+    [assetTablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
     
-	[self.navigationController pushViewController:picker animated:YES];
-	[picker release];
+	[self.navigationController pushViewController:assetTablePicker animated:YES];
+//	[picker release];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -149,7 +156,6 @@
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
     // Relinquish ownership any cached data, images, etc that aren't in use.
 }
 
@@ -161,7 +167,14 @@
 
 - (void)dealloc 
 {	
-	[assetGroups release];
+//	[assetGroups release];
+    
+    
+    self.assetTablePicker.assetGroup = nil;
+    [assetTablePicker release];
+    
+    self.assetGroups = nil;
+    
     [super dealloc];
 }
 

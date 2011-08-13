@@ -36,13 +36,25 @@
 	[self.tableView performSelector:@selector(reloadData) withObject:nil afterDelay:.5];
 }
 
+-(void)viewWillDisappear:(BOOL)animated {
+    self.assetGroup = nil;
+    self.parent = nil;
+    
+    [super viewWillDisappear:animated];
+}
+
 -(void)preparePhotos {
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-	
+    
+    int lastRowNumber = [self tableView:nil numberOfRowsInSection:0] - 1;
+    if (lastRowNumber >= 0) {
+        NSIndexPath* ip = [NSIndexPath indexPathForRow:lastRowNumber inSection:0];
+        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionTop animated:NO];   
+    }
+    
     NSLog(@"enumerating photos");
-    [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
+    [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
      {         
          if(result == nil) 
          {
@@ -57,7 +69,6 @@
 	
 	[self.tableView reloadData];
 	[self.navigationItem setTitle:@"Pick Photos"];
-    
     [pool release];
 
 }
@@ -92,38 +103,44 @@
 // ugly
 -(NSArray*)assetsForIndexPath:(NSIndexPath*)_indexPath {
     
-	int index = (_indexPath.row*4);
-	int maxIndex = (_indexPath.row*4+3);
+    int index = (self.assetGroup.numberOfAssets-1)-(_indexPath.row*4);
+    
+    int minIndex;
+    if (index < 3) {
+        minIndex = 0;
+    } else {
+        minIndex = index-3;
+    }
     
 	// NSLog(@"Getting assets for %d to %d with array count %d", index, maxIndex, [assets count]);
     
-	if(maxIndex < [self.elcAssets count]) {
+	if((index - minIndex) == 3 && index < self.elcAssets.count) {
         
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:index],
-				[self.elcAssets objectAtIndex:index+1],
-				[self.elcAssets objectAtIndex:index+2],
-				[self.elcAssets objectAtIndex:index+3],
+		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+3],
+				[self.elcAssets objectAtIndex:minIndex+2],
+				[self.elcAssets objectAtIndex:minIndex+1],
+				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
     
-	else if(maxIndex-1 < [self.elcAssets count]) {
+	else if((index - minIndex) == 2 && index < self.elcAssets.count) {
         
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:index],
-				[self.elcAssets objectAtIndex:index+1],
-				[self.elcAssets objectAtIndex:index+2],
+		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+2],
+				[self.elcAssets objectAtIndex:minIndex+1],
+				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
     
-	else if(maxIndex-2 < [self.elcAssets count]) {
+	else if((index - minIndex) == 1 && index < self.elcAssets.count) {
         
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:index],
-				[self.elcAssets objectAtIndex:index+1],
+		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+1],
+				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
     
-	else if(maxIndex-3 < [self.elcAssets count]) {
+	else if((index - minIndex) == 0 && index < self.elcAssets.count) {
         
-		return [NSArray arrayWithObject:[self.elcAssets objectAtIndex:index]];
+		return [NSArray arrayWithObject:[self.elcAssets objectAtIndex:minIndex]];
 	}
     
 	return nil;
