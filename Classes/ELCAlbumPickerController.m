@@ -39,7 +39,7 @@
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         
         // Group enumerator Block
-        void (^assetGroupEnumerator)(struct ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
+        void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
         {
             if (group == nil) 
             {

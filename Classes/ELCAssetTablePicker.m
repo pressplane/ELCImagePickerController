@@ -26,14 +26,13 @@
     self.elcAssets = tempArray;
     [tempArray release];
 	
-	UIBarButtonItem *doneButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)] autorelease];
+	UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
 	[self.navigationItem setRightBarButtonItem:doneButtonItem];
-	[self.navigationItem setTitle:@"Loading..."];
-
-	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+    [doneButtonItem release];
     
-    // Show partial while full list loads
-	[self.tableView performSelector:@selector(reloadData) withObject:nil afterDelay:.5];
+	[self.navigationItem setTitle:@"Loading..."];
+    
+	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
@@ -56,14 +55,21 @@
     NSLog(@"enumerating photos");
     [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
      {         
-         if(result == nil) 
-         {
+         if(result == nil) {
              return;
          }
          
-         ELCAsset *elcAsset = [[[ELCAsset alloc] initWithAsset:result] autorelease];
+         ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
          [elcAsset setParent:self];
          [self.elcAssets addObject:elcAsset];
+         
+         //Once we've loaded 24 then we should reload the table data because the screen is full
+         if ([self.elcAssets count] == 24) {
+             
+             [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+         }
+         
+         [elcAsset release];
      }];    
     NSLog(@"done enumerating photos");
 	
@@ -73,9 +79,14 @@
 
 }
 
-- (void) doneAction:(id)sender {
+-(void)reloadTableView {
 	
-	NSMutableArray *selectedAssetsImages = [[[NSMutableArray alloc] init] autorelease];
+	[self.tableView reloadData];
+}
+
+- (void)doneAction:(id)sender {
+	
+	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
 	    
 	for(ELCAsset *elcAsset in self.elcAssets) 
     {		
@@ -86,17 +97,19 @@
 	}
         
     [(ELCAlbumPickerController*)self.parent selectedAssets:selectedAssetsImages];
+    [selectedAssetsImages release];
 }
 
 #pragma mark UITableViewDataSource Delegate Methods
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections.
+    
     return 1;
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
     return ceil([self.assetGroup numberOfAssets] / 4.0);
 }
 
@@ -112,8 +125,7 @@
         minIndex = index-3;
     }
     
-	// NSLog(@"Getting assets for %d to %d with array count %d", index, maxIndex, [assets count]);
-    
+    // If there's four images in the row
 	if((index - minIndex) == 3 && index < self.elcAssets.count) {
         
 		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+3],
@@ -122,23 +134,23 @@
 				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
-    
-	else if((index - minIndex) == 2 && index < self.elcAssets.count) {
+    // If there's three images in the row    
+	else if ((index - minIndex) == 2 && index < self.elcAssets.count) {
         
 		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+2],
 				[self.elcAssets objectAtIndex:minIndex+1],
 				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
-    
-	else if((index - minIndex) == 1 && index < self.elcAssets.count) {
+    // If there's two images in the row
+	else if ((index - minIndex) == 1 && index < self.elcAssets.count) {
         
 		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+1],
 				[self.elcAssets objectAtIndex:minIndex],
 				nil];
 	}
-    
-	else if((index - minIndex) == 0 && index < self.elcAssets.count) {
+    // If there's one image in the row
+	else if ((index - minIndex) == 0 && index < self.elcAssets.count) {
         
 		return [NSArray arrayWithObject:[self.elcAssets objectAtIndex:minIndex]];
 	}
