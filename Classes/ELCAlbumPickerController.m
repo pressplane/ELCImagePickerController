@@ -33,48 +33,36 @@
 	self.assetGroups = tempArray;
     [tempArray release];
 
-    // Load Albums into assetGroups
-    dispatch_async(dispatch_get_main_queue(), ^
-    {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        
-        // Group enumerator Block
-        void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
-        {
-            if (group == nil) 
-            {
-                return;
-            }
-            
-            [self.assetGroups addObject:group];
-
-            // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
-            NSLog(@"count: %d", [group numberOfAssets]);
-
-            // Reload albums
-            [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
-        };
-        
-        // Group Enumerator Failure Block
-        void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-            
-            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Album Error: %@", [error description]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-            [alert show];
-            [alert release];
-            
-            NSLog(@"A problem occured %@", [error description]);	                                 
-        };	
-                
-        // Enumerate Albums
-        ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];        
-        [library enumerateGroupsWithTypes:ALAssetsGroupAll
-                               usingBlock:assetGroupEnumerator 
-                             failureBlock:assetGroupEnumberatorFailure];
-        
-        
-        [library release];
-        [pool release];
-    });    
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];        
+    [library enumerateGroupsWithTypes:ALAssetsGroupAll 
+                           usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+                               if (group == nil) 
+                               {
+                                   return;
+                               }
+                               
+                               [self.assetGroups addObject:group];
+                               
+                               // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
+                               NSLog(@"count: %d", [group numberOfAssets]);
+                               
+                               // Reload albums
+                               [self performSelectorOnMainThread:@selector(reloadTableView) 
+                                                      withObject:nil 
+                                                   waitUntilDone:YES];
+                           }
+                         failureBlock:^(NSError *error) {
+                             
+                             UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" 
+                                                                              message:[NSString stringWithFormat:@"Album Error: %@", [error description]] 
+                                                                             delegate:nil 
+                                                                    cancelButtonTitle:@"Ok" 
+                                                                    otherButtonTitles:nil];
+                             [alert show];
+                             [alert release];
+                             
+                             NSLog(@"A problem occured %@", [error description]);                                   
+                         }];
 }
 
 -(void)reloadTableView {
