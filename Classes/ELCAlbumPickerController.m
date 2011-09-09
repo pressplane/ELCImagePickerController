@@ -53,8 +53,20 @@
                            }
                          failureBlock:^(NSError *error) {
                              
-                             UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" 
-                                                                              message:[NSString stringWithFormat:@"Album Error: %@", [error description]] 
+                             NSString *errorMessage;
+                             NSString *errorTitle;
+                             
+                             // If we encounter a location services error, prompt the user to enable location services
+                             if ([error code] == -3311) {
+                                 errorMessage = [NSString stringWithFormat:@"It looks like you've disabled location servieces for this app - navigate to \"Location Services\" in your device's Settings and enable location services for %@ to add photos.",[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]]; 
+                                 errorTitle = [NSString stringWithString:@"Oops!"];
+                             } else {
+                                 errorMessage = [NSString stringWithFormat:@"Album Error: %@", [error localizedDescription]];
+                                 errorTitle = [NSString stringWithString:@"Error"];
+                             }
+                             
+                             UIAlertView * alert = [[UIAlertView alloc] initWithTitle:errorTitle
+                                                                              message:errorMessage
                                                                              delegate:nil 
                                                                     cancelButtonTitle:@"Ok" 
                                                                     otherButtonTitles:nil];
