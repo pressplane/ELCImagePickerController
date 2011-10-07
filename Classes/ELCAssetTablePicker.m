@@ -10,6 +10,12 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 
+@interface ELCAssetTablePicker()
+
+-(void)reloadTableView;
+-(void)scrollToBottom;
+    
+@end
 
 @implementation ELCAssetTablePicker
 
@@ -46,11 +52,7 @@
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    int lastRowNumber = [self tableView:nil numberOfRowsInSection:0] - 1;
-    if (lastRowNumber >= 0) {
-        NSIndexPath* ip = [NSIndexPath indexPathForRow:lastRowNumber inSection:0];
-        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionTop animated:NO];   
-    }
+    [self scrollToBottom];
     
     NSLog(@"enumerating photos");
     [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
@@ -66,7 +68,8 @@
          //Once we've loaded 24 then we should reload the table data because the screen is full
          if ([self.elcAssets count] == 24) {
              
-             [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+            [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+            [self performSelectorOnMainThread:@selector(scrollToBottom) withObject:nil waitUntilDone:YES];
          }
          
          [elcAsset release];
@@ -82,6 +85,15 @@
 -(void)reloadTableView {
 	
 	[self.tableView reloadData];
+}
+
+-(void)scrollToBottom {
+
+    int lastRowNumber = [self tableView:nil numberOfRowsInSection:0] - 1;
+    if (lastRowNumber >= 0) {
+        NSIndexPath* ip = [NSIndexPath indexPathForRow:lastRowNumber inSection:0];
+        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionTop animated:NO];   
+    }
 }
 
 - (void)doneAction:(id)sender {
