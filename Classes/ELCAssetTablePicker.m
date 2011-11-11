@@ -142,35 +142,15 @@
         minIndex = index-3;
     }
     
+    NSMutableArray *assetArray = [NSMutableArray array];
     // If there's four images in the row
-	if((index - minIndex) == 3 && index < self.elcAssets.count) {
-        
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+3],
-				[self.elcAssets objectAtIndex:minIndex+2],
-				[self.elcAssets objectAtIndex:minIndex+1],
-				[self.elcAssets objectAtIndex:minIndex],
-				nil];
-	}
-    // If there's three images in the row    
-	else if ((index - minIndex) == 2 && index < self.elcAssets.count) {
-        
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+2],
-				[self.elcAssets objectAtIndex:minIndex+1],
-				[self.elcAssets objectAtIndex:minIndex],
-				nil];
-	}
-    // If there's two images in the row
-	else if ((index - minIndex) == 1 && index < self.elcAssets.count) {
-        
-		return [NSArray arrayWithObjects:[self.elcAssets objectAtIndex:minIndex+1],
-				[self.elcAssets objectAtIndex:minIndex],
-				nil];
-	}
-    // If there's one image in the row
-	else if ((index - minIndex) == 0 && index < self.elcAssets.count) {
-        
-		return [NSArray arrayWithObject:[self.elcAssets objectAtIndex:minIndex]];
-	}
+    
+    if (index < self.elcAssets.count) {
+        for (NSInteger i=(index - minIndex); i > -1; i--) {
+            [assetArray addObject:[self.elcAssets objectAtIndex:minIndex+i]];
+        }
+		return assetArray;
+    }
     
 	return nil;
 }
