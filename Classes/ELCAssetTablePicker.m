@@ -10,6 +10,11 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 
+@interface ELCAssetTablePicker()
+
+- (void)scrollTableViewToBottom;
+
+@end
 
 @implementation ELCAssetTablePicker
 
@@ -67,6 +72,10 @@
          if ([self.elcAssets count] == 24) {
              
              [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+             
+             if (self.elcAssets.count == 1) {
+                 [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];                 
+             }
          }
          
          [elcAsset release];
@@ -79,9 +88,14 @@
 
 }
 
--(void)reloadTableView {
-	
-	[self.tableView reloadData];
+- (void)scrollTableViewToBottom {
+    
+    int lastRowIndex = [self tableView:nil numberOfRowsInSection:0] - 1;
+    if (lastRowIndex >= 0) {
+        
+        NSIndexPath* lastRowIndexPath = [NSIndexPath indexPathForRow:lastRowIndex inSection:0];
+        [self.tableView scrollToRowAtIndexPath:lastRowIndexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];   
+    }
 }
 
 - (void)doneAction:(id)sender {
