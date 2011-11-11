@@ -37,6 +37,12 @@
     
 	[self.navigationItem setTitle:@"Loading..."];
     
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    self.wantsFullScreenLayout = YES;
+    
+    [self.tableView reloadData];
+    
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
@@ -51,13 +57,8 @@
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    int lastRowNumber = [self tableView:nil numberOfRowsInSection:0] - 1;
-    if (lastRowNumber >= 0) {
-        NSIndexPath* ip = [NSIndexPath indexPathForRow:lastRowNumber inSection:0];
-        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionTop animated:NO];   
-    }
+    NSUInteger numberToLoad = [self.tableView indexPathsForVisibleRows].count * 4;
     
-    NSLog(@"enumerating photos");
     [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
      {         
          if(result == nil) {
@@ -69,9 +70,13 @@
          [self.elcAssets addObject:elcAsset];
          
          //Once we've loaded 24 then we should reload the table data because the screen is full
-         if ([self.elcAssets count] == 24) {
+         if (self.elcAssets.count <= numberToLoad) {
              
-             [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+             [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+             
+             if (self.elcAssets.count == numberToLoad-4) {
+                 [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Pick Photos" waitUntilDone:YES];   
+             }
              
              if (self.elcAssets.count == 1) {
                  [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];                 
@@ -79,13 +84,10 @@
          }
          
          [elcAsset release];
-     }];    
-    NSLog(@"done enumerating photos");
-	
-	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Pick Photos"];
-    [pool release];
+     }];
 
+    self.navigationItem.title = @"Pick Photos";
+    [pool release];
 }
 
 - (void)scrollTableViewToBottom {
@@ -124,7 +126,8 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return ceil([self.assetGroup numberOfAssets] / 4.0);
+    // Add two rows for the padding rows at the top and bottom of each section
+    return ceil([self.assetGroup numberOfAssets] / 4.0) + 2;
 }
 
 // ugly
@@ -175,25 +178,59 @@
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    static NSString *CellIdentifier = @"Cell";
+    if ([indexPath row] == 0)
+    {
+        static NSString *whitespaceCellIdentifier = @"WhitespaceTableViewCell";
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:whitespaceCellIdentifier];
+        if (cell == nil) {
+            cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier] autorelease];
+        }
+        return cell;
+    } else if ([indexPath row] == [self tableView:tableView numberOfRowsInSection:[indexPath section]]-1) {
         
-    ELCAssetCell *cell = (ELCAssetCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-
-    if (cell == nil) 
-    {		        
-        cell = [[[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:indexPath] reuseIdentifier:CellIdentifier] autorelease];
-    }	
-	else 
-    {		
-		[cell setAssets:[self assetsForIndexPath:indexPath]];
-	}
+        static NSString *whitespaceCellIdentifier = @"ELCCountTableViewCell";
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:whitespaceCellIdentifier];
+        if (cell == nil) {
+            cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier] autorelease];
+            cell.textLabel.textAlignment = UITextAlignmentCenter;
+            cell.textLabel.textColor = [UIColor grayColor];
+            cell.textLabel.font = [UIFont systemFontOfSize:19];
+        }
+        
+        cell.textLabel.text = [NSString stringWithFormat:@"%i Photos", self.assetGroup.numberOfAssets];
+        
+        return cell;
+        
+    } else {
     
-    return cell;
+        static NSString *CellIdentifier = @"Cell";
+            
+        ELCAssetCell *cell = (ELCAssetCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+
+        NSIndexPath *updatedIndexPath = [NSIndexPath indexPathForRow:indexPath.row-1 inSection:indexPath.section];
+        
+        if (cell == nil) 
+        {		        
+            cell = [[[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:updatedIndexPath] reuseIdentifier:CellIdentifier] autorelease];
+        }	
+        else 
+        {		
+            [cell setAssets:[self assetsForIndexPath:updatedIndexPath]];
+        }
+        
+        return cell;
+    }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-	return 79;
+    if (([indexPath row] == 0)) {
+        return 2;
+    } else if (indexPath.row == [self tableView:tableView numberOfRowsInSection:indexPath.section]-1) {
+        return 50;
+    } else {
+        return 79;
+    }
 }
 
 - (int)totalSelectedAssets {
