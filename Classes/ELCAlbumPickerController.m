@@ -20,6 +20,14 @@
 #pragma mark -
 #pragma mark View lifecycle
 
+static int compareGroupsUsingSelector(id p1, id p2, void *context)
+{
+    id value1 = [p1 valueForProperty:ALAssetsGroupPropertyType];
+    id value2 = [p2 valueForProperty:ALAssetsGroupPropertyType];
+    
+    return [value2 compare:value1];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
@@ -42,9 +50,10 @@
                                }
                                
                                [self.assetGroups addObject:group];
+                               [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
                                
                                // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
-                               NSLog(@"count: %d", [group numberOfAssets]);
+                               NSLog(@"count: %d for %@ (%@)", [group numberOfAssets], [group valueForProperty:ALAssetsGroupPropertyName] ,[group valueForProperty:ALAssetsGroupPropertyType]);
                                
                                // Reload albums
                                [self performSelectorOnMainThread:@selector(reloadTableView) 
