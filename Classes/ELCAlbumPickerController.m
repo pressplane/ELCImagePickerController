@@ -20,10 +20,22 @@
 #pragma mark -
 #pragma mark View lifecycle
 
+static int compareGroupsUsingSelector(id p1, id p2, void *context)
+{
+    id value1 = [p1 valueForProperty:ALAssetsGroupPropertyType];
+    id value2 = [p2 valueForProperty:ALAssetsGroupPropertyType];
+    
+    return [value2 compare:value1];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
 	[self.navigationItem setTitle:@"Loading..."];
+    
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    self.wantsFullScreenLayout = YES;
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	[self.navigationItem setRightBarButtonItem:cancelButton];
@@ -42,9 +54,10 @@
                                }
                                
                                [self.assetGroups addObject:group];
+                               [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
                                
                                // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
-                               NSLog(@"count: %d", [group numberOfAssets]);
+                               NSLog(@"count: %d for %@ (%@)", [group numberOfAssets], [group valueForProperty:ALAssetsGroupPropertyName] ,[group valueForProperty:ALAssetsGroupPropertyType]);
                                
                                // Reload albums
                                [self performSelectorOnMainThread:@selector(reloadTableView) 
@@ -110,7 +123,7 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
     }
     
     // Get count
@@ -118,7 +131,9 @@
     [g setAssetsFilter:[ALAssetsFilter allPhotos]];
     NSInteger gCount = [g numberOfAssets];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%d)",[g valueForProperty:ALAssetsGroupPropertyName], gCount];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@",[g valueForProperty:ALAssetsGroupPropertyName]];
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"(%d)",gCount];
+    cell.detailTextLabel.textColor = [UIColor grayColor];
     [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[assetGroups objectAtIndex:indexPath.row] posterImage]]];
 	[cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 	
