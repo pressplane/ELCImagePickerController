@@ -15,6 +15,7 @@
 		2899E5220DE3E06400AC0155 /* ELCImagePickerDemoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* ELCImagePickerDemoViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* ELCImagePickerDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* ELCImagePickerDemoViewController.m */; };
+		3A02AA4D1472D6EE006E26E5 /* UIImage+ScaleAndRotate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A02AA4C1472D6EE006E26E5 /* UIImage+ScaleAndRotate.m */; };
 		8FBE5D99131DC988001603C7 /* ELCAlbumPickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE5D89131DC988001603C7 /* ELCAlbumPickerController.m */; };
 		8FBE5D9A131DC988001603C7 /* ELCAssetTablePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE5D8B131DC988001603C7 /* ELCAssetTablePicker.m */; };
 		8FBE5D9B131DC988001603C7 /* ELCAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FBE5D8D131DC988001603C7 /* ELCAsset.m */; };
@@ -42,6 +43,8 @@
 		28D7ACF70DDB3853001CB0EB /* ELCImagePickerDemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCImagePickerDemoViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* ELCImagePickerDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCImagePickerDemo_Prefix.pch; sourceTree = "<group>"; };
+		3A02AA4B1472D6EE006E26E5 /* UIImage+ScaleAndRotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ScaleAndRotate.h"; sourceTree = "<group>"; };
+		3A02AA4C1472D6EE006E26E5 /* UIImage+ScaleAndRotate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ScaleAndRotate.m"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ELCImagePickerDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ELCImagePickerDemo-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		8FBE5D88131DC988001603C7 /* ELCAlbumPickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCAlbumPickerController.h; sourceTree = "<group>"; };
 		8FBE5D89131DC988001603C7 /* ELCAlbumPickerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCAlbumPickerController.m; sourceTree = "<group>"; };
@@ -86,6 +89,8 @@
 				28D7ACF60DDB3853001CB0EB /* ELCImagePickerDemoViewController.h */,
 				28D7ACF70DDB3853001CB0EB /* ELCImagePickerDemoViewController.m */,
 				2899E5210DE3E06400AC0155 /* ELCImagePickerDemoViewController.xib */,
+				3A02AA4B1472D6EE006E26E5 /* UIImage+ScaleAndRotate.h */,
+				3A02AA4C1472D6EE006E26E5 /* UIImage+ScaleAndRotate.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -248,6 +253,7 @@
 				8FBE5D9B131DC988001603C7 /* ELCAsset.m in Sources */,
 				8FBE5D9C131DC988001603C7 /* ELCAssetCell.m in Sources */,
 				8FBE5D9D131DC988001603C7 /* ELCImagePickerController.m in Sources */,
+				3A02AA4D1472D6EE006E26E5 /* UIImage+ScaleAndRotate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
