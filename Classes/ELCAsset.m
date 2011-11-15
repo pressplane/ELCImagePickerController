@@ -11,7 +11,7 @@
 @implementation ELCAsset
 
 @synthesize asset;
-@synthesize parent;
+@synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -47,14 +47,9 @@
     
 	overlayView.hidden = !overlayView.hidden;
     
-//    if([(ELCAssetTablePicker*)self.parent totalSelectedAssets] >= 10) {
-//        
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Maximum Reached" message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
-//		[alert show];
-//		[alert release];	
-//
-//        [(ELCAssetTablePicker*)self.parent doneAction:nil];
-//    }
+    if ([self.delegate respondsToSelector:@selector(assetSelected:)]) {
+        [self.delegate assetSelected:self];
+    }
 }
 
 -(BOOL)selected {
@@ -70,6 +65,7 @@
 - (void)dealloc 
 {    
     self.asset = nil;
+    self.delegate = nil;
 	[overlayView release];
     [super dealloc];
 }

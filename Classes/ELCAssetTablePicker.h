@@ -6,9 +6,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ELCAsset.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
-@interface ELCAssetTablePicker : UITableViewController
+@interface ELCAssetTablePicker : UITableViewController <ELCAssetProtocol>
 {
 	ALAssetsGroup *assetGroup;
 	

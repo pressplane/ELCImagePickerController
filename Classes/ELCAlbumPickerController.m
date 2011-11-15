@@ -31,7 +31,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	[self.navigationItem setTitle:@"Loading..."];
+	[self.navigationItem setTitle:@"Albums"];
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
@@ -93,7 +93,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 -(void)reloadTableView {
 	
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Select an Album"];
 }
 
 -(void)selectedAssets:(NSArray*)_assets {

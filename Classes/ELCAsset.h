@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
+@protocol ELCAssetProtocol;
 
 @interface ELCAsset : UIView {
 	ALAsset *asset;
@@ -17,9 +18,16 @@
 }
 
 @property (nonatomic, retain) ALAsset *asset;
-@property (nonatomic, assign) id parent;
+@property (nonatomic, assign) id<ELCAssetProtocol> delegate;
 
 -(id)initWithAsset:(ALAsset*)_asset;
 -(BOOL)selected;
+
+@end
+
+@protocol ELCAssetProtocol <NSObject>
+
+@optional
+- (void)assetSelected:(ELCAsset*)asset;
 
 @end
