@@ -70,8 +70,11 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
                              NSString *errorTitle;
                              
                              // If we encounter a location services error, prompt the user to enable location services
-                             if ([error code] == -3311) {
-                                 errorMessage = [NSString stringWithFormat:@"It looks like you've disabled location servieces for this app - navigate to \"Location Services\" in your device's Settings and enable location services for %@ to add photos.",[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]]; 
+                             if ([error code] == ALAssetsLibraryAccessUserDeniedError) {
+                                 errorMessage = [NSString stringWithFormat:@"It looks like you've disabled location services for this app. To add photos, enable \"Location Services\" for %@ in your device's \"Settings\" App.",[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]];
+                                 errorTitle = [NSString stringWithString:@"Oops!"];
+                             } else if ([error code] == ALAssetsLibraryAccessGloballyDeniedError) {
+                                 errorMessage = [NSString stringWithString:@"It looks like you've disabled location services on your device. To add photos, enable \"Location Services\" in your device's \"Settings\" App."]; 
                                  errorTitle = [NSString stringWithString:@"Oops!"];
                              } else {
                                  errorMessage = [NSString stringWithFormat:@"Album Error: %@", [error localizedDescription]];
