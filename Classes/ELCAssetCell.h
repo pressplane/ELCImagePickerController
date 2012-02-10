@@ -16,6 +16,8 @@
 -(id)initWithAssets:(NSArray*)_assets reuseIdentifier:(NSString*)_identifier;
 -(void)setAssets:(NSArray*)_assets;
 
++ (CGFloat)cellPadding;
+
 @property (nonatomic,retain) NSArray *rowAssets;
 
 @end

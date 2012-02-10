@@ -34,7 +34,9 @@
 
 -(void)layoutSubviews {
     
-	CGRect frame = CGRectMake(4, 2, 75, 75);
+    CGRect frame;
+    CGFloat padding = [ELCAssetCell cellPadding];
+    frame = CGRectMake(padding, padding/2, 75, 75);
 	
 	for(ELCAsset *elcAsset in self.rowAssets) {
 		
@@ -42,8 +44,17 @@
 		[elcAsset addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:elcAsset action:@selector(toggleSelection)] autorelease]];
 		[self addSubview:elcAsset];
 		
-		frame.origin.x = frame.origin.x + frame.size.width + 4;
+		frame.origin.x = frame.origin.x + frame.size.width + padding;
 	}
+}
+
++ (CGFloat)cellPadding
+{
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return 13.0;
+    } else {
+        return 4.0;
+    }
 }
 
 -(void)dealloc 

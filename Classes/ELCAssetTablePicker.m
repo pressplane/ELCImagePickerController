@@ -16,6 +16,8 @@
 
 - (void)scrollTableViewToBottom;
 
+- (NSInteger)assetsPerRow;
+
 @end
 
 @implementation ELCAssetTablePicker
@@ -41,7 +43,10 @@
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    self.wantsFullScreenLayout = YES;
+
+    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
+        self.wantsFullScreenLayout = YES;
+    }
     
     [self.tableView reloadData];
     
@@ -61,7 +66,14 @@
     
     // Isn't happy on iOS 4, so just hardcoding it
     // NSUInteger numberToLoad = [self.tableView indexPathsForVisibleRows].count * 4;
-    NSUInteger numberToLoad = 24;
+    
+    NSUInteger numberToLoad;
+    
+    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
+        numberToLoad = 10 * [self assetsPerRow];   
+    } else {
+        numberToLoad = 6 * [self assetsPerRow];   
+    }
     
     [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
      {         
@@ -73,17 +85,17 @@
          [elcAsset setDelegate:self];
          [self.elcAssets addObject:elcAsset];
          
-         //Once we've loaded 24 then we should reload the table data because the screen is full
+         //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
          if (self.elcAssets.count <= numberToLoad) {
              
-             [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+             [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
              
-             if (self.elcAssets.count == numberToLoad-4) {
+             if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
                  [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
              }
              
              if (self.elcAssets.count == 1) {
-                 [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];                 
+                 [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
              }
          }
          
@@ -205,6 +217,15 @@
     [selectedAssetsImages release];
 }
 
+- (NSInteger)assetsPerRow
+{
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return 6;
+    } else {
+        return 4;
+    }
+}
+
 #pragma mark UITableViewDataSource Delegate Methods
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -212,23 +233,22 @@
     return 1;
 }
 
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    // Add two rows for the padding rows at the top and bottom of each section
-    return ceil([self.assetGroup numberOfAssets] / 4.0) + 2;
+    // Add two rows for padding at the top and bottom of each section
+    return ceil([self.assetGroup numberOfAssets] / [self assetsPerRow]) + 2;
 }
 
 // ugly
 -(NSArray*)assetsForIndexPath:(NSIndexPath*)_indexPath {
     
-    int index = (self.assetGroup.numberOfAssets-1)-(_indexPath.row*4);
+    int index = (self.assetGroup.numberOfAssets-1)-(_indexPath.row*[self assetsPerRow]);
     
     int minIndex;
-    if (index < 3) {
+    if (index < ([self assetsPerRow]-1)) {
         minIndex = 0;
     } else {
-        minIndex = index-3;
+        minIndex = index-([self assetsPerRow]-1);
     }
     
     NSMutableArray *assetArray = [NSMutableArray array];
@@ -236,6 +256,9 @@
     
     if (index < self.elcAssets.count) {
         for (NSInteger i=(index - minIndex); i > -1; i--) {
+            
+//            NSLog(@"building asset at index %d", minIndex+i);
+            
             [assetArray addObject:[self.elcAssets objectAtIndex:minIndex+i]];
         }
 		return assetArray;
@@ -255,6 +278,7 @@
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier] autorelease];
         }
         return cell;
+        
     } else if ([indexPath row] == [self tableView:tableView numberOfRowsInSection:[indexPath section]]-1) {
         
         static NSString *whitespaceCellIdentifier = @"ELCCountTableViewCell";
@@ -294,11 +318,19 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (([indexPath row] == 0)) {
-        return 2;
+        
+        return [ELCAssetCell cellPadding]/2;
+        
     } else if (indexPath.row == [self tableView:tableView numberOfRowsInSection:indexPath.section]-1) {
+        
         return 50;
+        
     } else {
-        return 79;
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+            return 89;
+        } else {
+            return 79;            
+        }
     }
 }
 
