@@ -33,15 +33,16 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 	
 	[self.navigationItem setTitle:@"Albums"];
     
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     
     if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
         self.wantsFullScreenLayout = YES;
-    } 
+    }  else {
+        [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
+    }
     
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
-	[self.navigationItem setRightBarButtonItem:cancelButton];
+	self.navigationItem.leftBarButtonItem = cancelButton;
 	[cancelButton release];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];

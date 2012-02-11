@@ -41,11 +41,12 @@
     
 	[self.navigationItem setTitle:@"Loading..."];
     
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
 
     if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
         self.wantsFullScreenLayout = YES;
+    } else {
+        [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     }
     
     [self.tableView reloadData];
