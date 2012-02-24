@@ -237,7 +237,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
     // Add two rows for padding at the top and bottom of each section
-    return ceil([self.assetGroup numberOfAssets] / [self assetsPerRow]) + 2;
+    return ceil([self.assetGroup numberOfAssets] / [self assetsPerRow]) + 3;
 }
 
 // ugly
