@@ -18,6 +18,6 @@
 
 + (CGFloat)cellPadding;
 
-@property (nonatomic,retain) NSArray *rowAssets;
+@property (nonatomic) NSArray *rowAssets;
 
 @end

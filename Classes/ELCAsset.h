@@ -17,8 +17,8 @@
 	id parent;
 }
 
-@property (nonatomic, retain) ALAsset *asset;
-@property (nonatomic, assign) id<ELCAssetProtocol> delegate;
+@property (nonatomic) ALAsset *asset;
+@property (nonatomic, unsafe_unretained) id<ELCAssetProtocol> delegate;
 
 -(id)initWithAsset:(ALAsset*)_asset;
 -(BOOL)selected;

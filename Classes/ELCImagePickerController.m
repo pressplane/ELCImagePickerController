@@ -27,14 +27,14 @@
 
 -(void)selectedAssets:(NSArray*)_assets {
 
-	NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
+	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 	
 	for(ALAsset *asset in _assets) {
         
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+        @autoreleasepool {
 
-		NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
-		[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType] forKey:@"UIImagePickerControllerMediaType"];
+			NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
+			[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType] forKey:@"UIImagePickerControllerMediaType"];
         
         CGImageRef fullImageRef = [[asset defaultRepresentation] fullResolutionImage];
         UIImageOrientation orientation = ((UIImageOrientation)[[asset valueForProperty:@"ALAssetPropertyOrientation"] integerValue]);
@@ -43,12 +43,11 @@
         UIImage *scaledImage = [fullResolutionImage scaledAndRotatedImageWithMaxResolution:1024];
         [workingDictionary setObject:scaledImage forKey:@"UIImagePickerControllerOriginalImage"];
         
-		[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
-		
-		[returnArray addObject:workingDictionary];
-		[workingDictionary release];
+			[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
+			
+			[returnArray addObject:workingDictionary];
         
-        [pool release];
+        }
 	}
 	
     [self popToRootViewControllerAnimated:NO];
@@ -75,7 +74,6 @@
 
 - (void)dealloc {
     NSLog(@"deallocing ELCImagePickerController");
-    [super dealloc];
 }
 
 @end

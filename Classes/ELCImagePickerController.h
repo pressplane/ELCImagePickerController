@@ -10,10 +10,10 @@
 
 @interface ELCImagePickerController : UINavigationController {
 
-	id delegate;
+	id __unsafe_unretained delegate;
 }
 
-@property (nonatomic, assign) id delegate;
+@property (nonatomic, unsafe_unretained) id delegate;
 
 -(void)selectedAssets:(NSArray*)_assets;
 -(void)cancelImagePicker;

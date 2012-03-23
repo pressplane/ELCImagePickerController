@@ -17,13 +17,13 @@
     
     ELCAssetTablePicker *assetTablePicker;
     
-	id parent;
+	id __unsafe_unretained parent;
 }
 
-@property (nonatomic, assign) id parent;
-@property (nonatomic, retain) NSMutableArray *assetGroups;
+@property (nonatomic, unsafe_unretained) id parent;
+@property (nonatomic) NSMutableArray *assetGroups;
 
-@property (nonatomic, retain) ELCAssetTablePicker *assetTablePicker;
+@property (nonatomic) ELCAssetTablePicker *assetTablePicker;
 
 -(void)selectedAssets:(NSArray*)_assets;
 

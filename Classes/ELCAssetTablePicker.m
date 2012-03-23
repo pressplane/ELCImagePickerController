@@ -33,11 +33,9 @@
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
-    [tempArray release];
 	
 	UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
 	[self.navigationItem setRightBarButtonItem:doneButtonItem];
-    [doneButtonItem release];
     
 	[self.navigationItem setTitle:@"Loading..."];
     
@@ -63,48 +61,47 @@
 
 -(void)preparePhotos {
     
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
     
     // Isn't happy on iOS 4, so just hardcoding it
     // NSUInteger numberToLoad = [self.tableView indexPathsForVisibleRows].count * 4;
     
-    NSUInteger numberToLoad;
-    
-    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
-        numberToLoad = 10 * [self assetsPerRow];   
-    } else {
-        numberToLoad = 6 * [self assetsPerRow];   
-    }
-    
-    [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
-     {         
-         if(result == nil) {
-             return;
-         }
-         
-         ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
-         [elcAsset setDelegate:self];
-         [self.elcAssets addObject:elcAsset];
-         
-         //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
-         if (self.elcAssets.count <= numberToLoad) {
-             
-             [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-             
-             if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
-                 [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
+        NSUInteger numberToLoad;
+        
+        if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
+            numberToLoad = 10 * [self assetsPerRow];   
+        } else {
+            numberToLoad = 6 * [self assetsPerRow];   
+        }
+        
+        [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
+         {         
+             if(result == nil) {
+                 return;
              }
              
-             if (self.elcAssets.count == 1) {
-                 [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+             ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+             [elcAsset setDelegate:self];
+             [self.elcAssets addObject:elcAsset];
+             
+             //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
+             if (self.elcAssets.count <= numberToLoad) {
+                 
+                 [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                 
+                 if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
+                     [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
+                 }
+                 
+                 if (self.elcAssets.count == 1) {
+                     [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+                 }
              }
-         }
-         
-         [elcAsset release];
-     }];
+             
+         }];
 
-    self.navigationItem.title = @"Select Photos";
-    [pool release];
+        self.navigationItem.title = @"Select Photos";
+    }
 }
 
 - (void)assetSelected:(ELCAsset*)asset
@@ -146,7 +143,6 @@
                 titleLabel.text = self.navigationItem.title;
                 
                 [self.navigationItem setTitleView:titleLabel];
-                [titleLabel release];
                 
                 self.navigationItem.rightBarButtonItem.enabled = NO;
             }
@@ -215,7 +211,6 @@
 	}
         
     [(ELCAlbumPickerController*)self.parent selectedAssets:selectedAssetsImages];
-    [selectedAssetsImages release];
 }
 
 - (NSInteger)assetsPerRow
@@ -276,7 +271,7 @@
         static NSString *whitespaceCellIdentifier = @"WhitespaceTableViewCell";
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:whitespaceCellIdentifier];
         if (cell == nil) {
-            cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier] autorelease];
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier];
         }
         return cell;
         
@@ -285,7 +280,7 @@
         static NSString *whitespaceCellIdentifier = @"ELCCountTableViewCell";
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:whitespaceCellIdentifier];
         if (cell == nil) {
-            cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier] autorelease];
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:whitespaceCellIdentifier];
             cell.textLabel.textAlignment = UITextAlignmentCenter;
             cell.textLabel.textColor = [UIColor grayColor];
             cell.textLabel.font = [UIFont systemFontOfSize:19];
@@ -305,7 +300,7 @@
         
         if (cell == nil) 
         {		        
-            cell = [[[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:updatedIndexPath] reuseIdentifier:CellIdentifier] autorelease];
+            cell = [[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:updatedIndexPath] reuseIdentifier:CellIdentifier];
         }	
         else 
         {		
@@ -350,11 +345,5 @@
     return count;
 }
 
-- (void)dealloc 
-{
-    [elcAssets release];
-    [selectedAssetsLabel release];
-    [super dealloc];    
-}
 
 @end

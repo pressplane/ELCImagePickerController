@@ -43,11 +43,9 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	self.navigationItem.leftBarButtonItem = cancelButton;
-	[cancelButton release];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
-    [tempArray release];
 
     ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];        
     [library enumerateGroupsWithTypes:ALAssetsGroupAll 
@@ -91,7 +89,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
                                                                     cancelButtonTitle:@"Ok" 
                                                                     otherButtonTitles:nil];
                              [alert show];
-                             [alert release];
                              
                              NSLog(@"A problem occured %@", [error description]);                                   
                          }];
@@ -129,7 +126,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
     }
     
     // Get count
@@ -154,7 +151,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
     
 	self.assetTablePicker = tempAssetTablePicker;
-    [tempAssetTablePicker release];
     
 	assetTablePicker.parent = self;
 
@@ -192,11 +188,8 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     
     
     self.assetTablePicker.assetGroup = nil;
-    [assetTablePicker release];
     
-    self.assetGroups = nil;
     
-    [super dealloc];
 }
 
 @end
