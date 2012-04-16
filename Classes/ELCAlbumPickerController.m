@@ -12,10 +12,9 @@
 
 @implementation ELCAlbumPickerController
 
-@synthesize parent, assetGroups;
+@synthesize parent, assetGroups, assetLibrary;
 
 @synthesize assetTablePicker;
-
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -47,8 +46,8 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
 
-    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];        
-    [library enumerateGroupsWithTypes:ALAssetsGroupAll 
+    self.assetLibrary = [[ALAssetsLibrary alloc] init];        
+    [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll 
                            usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
                                if (group == nil) 
                                {

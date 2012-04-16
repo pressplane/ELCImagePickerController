@@ -74,31 +74,33 @@
             numberToLoad = 6 * [self assetsPerRow];   
         }
         
-        [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
-         {         
-             if(result == nil) {
-                 return;
-             }
-             
-             ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
-             [elcAsset setDelegate:self];
-             [self.elcAssets addObject:elcAsset];
-             
-             //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
-             if (self.elcAssets.count <= numberToLoad) {
-                 
-                 [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-                 
-                 if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
-                     [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
+        @synchronized(self.elcAssets) {
+            [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
+             {         
+                 if(result == nil) {
+                     return;
                  }
                  
-                 if (self.elcAssets.count == 1) {
-                     [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+                 ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+                 [elcAsset setDelegate:self];
+                 [self.elcAssets addObject:elcAsset];
+                 
+                 //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
+                 if (self.elcAssets.count <= numberToLoad) {
+                     
+                     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                     
+                     if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
+                         [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
+                     }
+                     
+                     if (self.elcAssets.count == 1) {
+                         [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+                     }
                  }
-             }
-             
-         }];
+                 
+             }];
+        }
 
         self.navigationItem.title = @"Select Photos";
     }
@@ -334,13 +336,15 @@
     
     int count = 0;
     
-    for(ELCAsset *asset in self.elcAssets) 
-    {
-		if([asset selected]) 
-        {            
-            count++;	
-		}
-	}
+    @synchronized(self.elcAssets) {
+        for(ELCAsset *asset in self.elcAssets) 
+        {
+            if([asset selected]) 
+            {            
+                count++;	
+            }
+        }
+    }
     
     return count;
 }

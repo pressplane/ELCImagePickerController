@@ -7,8 +7,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class ELCAssetTablePicker;
-
+@class ELCAssetTablePicker, ALAssetsLibrary;
 
 @interface ELCAlbumPickerController : UITableViewController {
 	
@@ -21,7 +20,8 @@
 }
 
 @property (nonatomic, unsafe_unretained) id parent;
-@property (nonatomic) NSMutableArray *assetGroups;
+@property (nonatomic, strong) ALAssetsLibrary *assetLibrary;
+@property (nonatomic, strong) NSMutableArray *assetGroups;
 
 @property (nonatomic) ELCAssetTablePicker *assetTablePicker;
 
