@@ -25,6 +25,9 @@
 
 @property (nonatomic) ELCAssetTablePicker *assetTablePicker;
 
+// Provide our own asset library so the Asset URLs will live on!
+- (id)initWithAssetLibrary:(ALAssetsLibrary *)library;
+
 -(void)selectedAssets:(NSArray*)_assets;
 
 @end

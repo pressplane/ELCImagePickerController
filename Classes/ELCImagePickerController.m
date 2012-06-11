@@ -34,19 +34,21 @@
         @autoreleasepool {
 
 			NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
-			[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType] forKey:@"UIImagePickerControllerMediaType"];
+			[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType]
+                                  forKey:@"UIImagePickerControllerMediaType"];
         
-        CGImageRef fullImageRef = [[asset defaultRepresentation] fullResolutionImage];
-        UIImageOrientation orientation = ((UIImageOrientation)[[asset valueForProperty:@"ALAssetPropertyOrientation"] integerValue]);
-        UIImage *fullResolutionImage = [UIImage imageWithCGImage:fullImageRef scale:1.0 orientation:orientation];
+            [workingDictionary setObject:(id)asset.defaultRepresentation.fullScreenImage
+                                  forKey:@"UIImagePickerControllerOriginalImage"];
         
-        UIImage *scaledImage = [fullResolutionImage scaledAndRotatedImageWithMaxResolution:1024];
-        [workingDictionary setObject:scaledImage forKey:@"UIImagePickerControllerOriginalImage"];
-        
-			[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
-			
-			[returnArray addObject:workingDictionary];
-        
+			[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs]
+                                          valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys]
+                                                       objectAtIndex:0]]
+                                  forKey:@"UIImagePickerControllerReferenceURL"];
+
+            [workingDictionary setObject:asset.defaultRepresentation
+                                  forKey:@"ALAssetRepresentation"];
+
+			[returnArray addObject:workingDictionary];        
         }
 	}
 	

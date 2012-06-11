@@ -16,6 +16,18 @@
 
 @synthesize assetTablePicker;
 
+
+#pragma mark - Init
+
+- (id)initWithAssetLibrary:(ALAssetsLibrary *)library
+{
+    self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
+    if (self) {
+        self.assetLibrary = library;
+    }
+    return self;
+}
+
 #pragma mark -
 #pragma mark View lifecycle
 
@@ -46,7 +58,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
 
-    self.assetLibrary = [[ALAssetsLibrary alloc] init];        
+    if (self.assetLibrary == nil) self.assetLibrary = [[ALAssetsLibrary alloc] init];
     [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll 
                            usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
                                if (group == nil) 
