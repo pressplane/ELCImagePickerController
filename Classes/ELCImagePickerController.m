@@ -35,15 +35,15 @@
 
 			NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
 			[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType]
-                                  forKey:@"UIImagePickerControllerMediaType"];
+                                  forKey:@"ALAssetPropertyType"];
         
             [workingDictionary setObject:(id)asset.defaultRepresentation.fullScreenImage
-                                  forKey:@"UIImagePickerControllerOriginalImage"];
+                                  forKey:@"ALAssetFullScreenImageRef"];
         
 			[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs]
                                           valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys]
                                                        objectAtIndex:0]]
-                                  forKey:@"UIImagePickerControllerReferenceURL"];
+                                  forKey:@"ALAssetPropertyURL"];
 
             [workingDictionary setObject:asset.defaultRepresentation
                                   forKey:@"ALAssetRepresentation"];
