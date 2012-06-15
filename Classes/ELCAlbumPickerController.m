@@ -15,6 +15,7 @@
 @synthesize parent, assetGroups, assetLibrary;
 
 @synthesize assetTablePicker;
+@synthesize alreadySelectedURLs;
 
 
 #pragma mark - Init

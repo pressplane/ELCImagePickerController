@@ -83,6 +83,12 @@
                  
                  ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
                  [elcAsset setDelegate:self];
+                 
+                 // Mark all the selected assets
+                 if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs
+                      containsObject:elcAsset.asset.defaultRepresentation.url])
+                     elcAsset.selected = YES;
+
                  [self.elcAssets addObject:elcAsset];
                  
                  //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
