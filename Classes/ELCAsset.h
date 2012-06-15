@@ -20,8 +20,9 @@
 @property (nonatomic) ALAsset *asset;
 @property (nonatomic, unsafe_unretained) id<ELCAssetProtocol> delegate;
 
+@property (nonatomic) BOOL selected;
+
 -(id)initWithAsset:(ALAsset*)_asset;
--(BOOL)selected;
 
 @end
 

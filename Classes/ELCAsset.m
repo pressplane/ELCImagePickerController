@@ -13,6 +13,8 @@
 @synthesize asset;
 @synthesize delegate;
 
+@synthesize selected;
+
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         // Initialization code
