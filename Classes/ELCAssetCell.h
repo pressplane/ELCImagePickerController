@@ -13,7 +13,7 @@
 	NSArray *rowAssets;
 }
 
--(id)initWithAssets:(NSArray*)_assets reuseIdentifier:(NSString*)_identifier;
+-(id)initWithAssets:(NSArray*)_assets assetsPerRow:(NSInteger)perRow reuseIdentifier:(NSString*)_identifier;
 -(void)setAssets:(NSArray*)_assets;
 
 + (CGFloat)cellPadding;

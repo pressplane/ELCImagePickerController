@@ -13,54 +13,33 @@
 @synthesize asset;
 @synthesize delegate;
 
+@synthesize thumbnail;
 @synthesize selected;
-
-- (id)initWithFrame:(CGRect)frame {
-    if ((self = [super initWithFrame:frame])) {
-        // Initialization code
-    }
-    return self;
-}
 
 -(id)initWithAsset:(ALAsset*)_asset {
 	
 	if (self = [super initWithFrame:CGRectMake(0, 0, 0, 0)]) {
-		
 		self.asset = _asset;
-		
-		CGRect viewFrames = CGRectMake(0, 0, 75, 75);
-		
-		UIImageView *assetImageView = [[UIImageView alloc] initWithFrame:viewFrames];
-		[assetImageView setContentMode:UIViewContentModeScaleToFill];
-		[assetImageView setImage:[UIImage imageWithCGImage:[self.asset thumbnail]]];
-		[self addSubview:assetImageView];
-		
-		overlayView = [[UIImageView alloc] initWithFrame:viewFrames];
-		[overlayView setImage:[UIImage imageNamed:@"Overlay.png"]];
-		[overlayView setHidden:YES];
-		[self addSubview:overlayView];
     }
     
-	return self;	
+	return self;
 }
 
--(void)toggleSelection {
-    
-	overlayView.hidden = !overlayView.hidden;
+- (void)toggleSelected
+{
+    selected = !selected;
     
     if ([self.delegate respondsToSelector:@selector(assetSelected:)]) {
         [self.delegate assetSelected:self];
     }
 }
 
--(BOOL)selected {
-	
-	return !overlayView.hidden;
-}
-
--(void)setSelected:(BOOL)_selected {
-    
-	[overlayView setHidden:!_selected];
+- (UIImage *)thumbnail
+{
+    if (!thumbnail) {
+        thumbnail = [UIImage imageWithCGImage:self.asset.thumbnail];
+    }
+    return thumbnail;
 }
 
 - (void)dealloc 

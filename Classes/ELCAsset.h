@@ -19,11 +19,11 @@
 
 @property (nonatomic) ALAsset *asset;
 @property (nonatomic, unsafe_unretained) id<ELCAssetProtocol> delegate;
-
 @property (nonatomic) BOOL selected;
+@property (nonatomic, strong) UIImage *thumbnail;
 
 -(id)initWithAsset:(ALAsset*)_asset;
-
+- (void)toggleSelected;
 @end
 
 @protocol ELCAssetProtocol <NSObject>

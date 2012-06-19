@@ -12,7 +12,9 @@
 
 #define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 
-@interface ELCAssetTablePicker()
+@interface ELCAssetTablePicker() {
+    BOOL controllerIsDisappearing;
+}
 
 - (void)scrollTableViewToBottom;
 
@@ -46,17 +48,31 @@
     } else {
         [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     }
-    
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    controllerIsDisappearing = NO;
     [self.tableView reloadData];
-    
-	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
+    // this is used to tell preparePhotos to stop if it's still going...
+    controllerIsDisappearing = YES;
+    
     self.assetGroup = nil;
     self.parent = nil;
     
     [super viewWillDisappear:animated];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    // thumbnails are cached for better scrolling performance
+    for (ELCAsset *asset in self.elcAssets) {
+        asset.thumbnail = nil;
+    }
 }
 
 -(void)preparePhotos {
@@ -66,17 +82,25 @@
     // Isn't happy on iOS 4, so just hardcoding it
     // NSUInteger numberToLoad = [self.tableView indexPathsForVisibleRows].count * 4;
     
+        NSInteger numberOfAssets = self.assetGroup.numberOfAssets;
+        NSInteger assetsPerRow = [self assetsPerRow];
         NSUInteger numberToLoad;
         
         if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
-            numberToLoad = 10 * [self assetsPerRow];   
+            numberToLoad = 10 * assetsPerRow;
         } else {
-            numberToLoad = 6 * [self assetsPerRow];   
+            numberToLoad = 6 * assetsPerRow;
         }
         
         @synchronized(self.elcAssets) {
             [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
-             {         
+             {
+                 // The controller is going away. Quit attempting to load more assets...
+                 if (controllerIsDisappearing) {
+                     *stop = YES;
+                     return;
+                 }
+                                  
                  if(result == nil) {
                      return;
                  }
@@ -91,17 +115,26 @@
 
                  [self.elcAssets addObject:elcAsset];
                  
-                 //Once we've loaded the numberToLoad then we should reload the table data because the screen is full
-                 if (self.elcAssets.count <= numberToLoad) {
-                     
-                     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-                     
-                     if (self.elcAssets.count == numberToLoad-[self assetsPerRow]) {
-                         [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];   
+                 // Get tableview into sync with the assets we've now loaded...
+                 NSInteger currentAssetCount = self.elcAssets.count;
+                 if (currentAssetCount <= numberToLoad) {
+                     // if we just finished doing the first row, scroll to it
+                     if (currentAssetCount == assetsPerRow) {
+                         [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
                      }
                      
-                     if (self.elcAssets.count == 1) {
-                         [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+                     if (currentAssetCount == numberToLoad) {
+                         // reload the tableView once, when done with the current page
+                         // to ensure it's appearing correctly
+                         [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+                         [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];
+                     }
+                 } else {
+                     // After the first screenful has loaded, notify that we finished a row.
+                     // This gives rows that got scrolled into view before their assets loaded a chance to update
+                     if ((numberOfAssets-currentAssetCount) % assetsPerRow == 0) {
+                         NSInteger currentRow = ceilf((float)(numberOfAssets-currentAssetCount) / assetsPerRow) + 1 /* it's the next row that is fully loaded */ + 1 /* header row */;
+                         [self performSelectorOnMainThread:@selector(finishedLoadingRow:) withObject:[NSIndexPath indexPathForRow:currentRow inSection:0]  waitUntilDone:YES];
                      }
                  }
                  
@@ -109,6 +142,13 @@
         }
 
         self.navigationItem.title = @"Select Photos";
+    }
+}
+
+- (void)finishedLoadingRow:(NSIndexPath *)row
+{
+    if ([[self.tableView indexPathsForVisibleRows] containsObject:row]) {
+        [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:row] withRowAnimation:UITableViewRowAnimationNone];
     }
 }
 
@@ -308,7 +348,7 @@
         
         if (cell == nil) 
         {		        
-            cell = [[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:updatedIndexPath] reuseIdentifier:CellIdentifier];
+            cell = [[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:updatedIndexPath] assetsPerRow:[self assetsPerRow] reuseIdentifier:CellIdentifier];
         }	
         else 
         {		
@@ -345,9 +385,9 @@
     @synchronized(self.elcAssets) {
         for(ELCAsset *asset in self.elcAssets) 
         {
-            if([asset selected]) 
-            {            
-                count++;	
+            if(asset.selected)
+            {
+                count++;
             }
         }
     }
