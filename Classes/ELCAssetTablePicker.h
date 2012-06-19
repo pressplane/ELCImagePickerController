@@ -10,19 +10,15 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 
 @interface ELCAssetTablePicker : UITableViewController <ELCAssetProtocol>
-{
-	ALAssetsGroup *__unsafe_unretained assetGroup;
-	
+{	
 	NSMutableArray *elcAssets;
 	int selectedAssets;
-	
-	id __unsafe_unretained parent;
-	
+		
 	NSOperationQueue *queue;
 }
 
-@property (nonatomic, unsafe_unretained) id parent;
-@property (nonatomic, unsafe_unretained) ALAssetsGroup *assetGroup;
+@property (nonatomic, weak) id parent;
+@property (nonatomic, strong) ALAssetsGroup *assetGroup;
 @property (nonatomic, strong) NSMutableArray *elcAssets;
 @property (nonatomic, strong) IBOutlet UILabel *selectedAssetsLabel;
 
