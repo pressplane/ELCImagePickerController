@@ -56,10 +56,12 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	self.navigationItem.leftBarButtonItem = cancelButton;
 
-    NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-	self.assetGroups = tempArray;
+	self.assetGroups = [[NSMutableArray alloc] init];
 
-    if (self.assetLibrary == nil) self.assetLibrary = [[ALAssetsLibrary alloc] init];
+    if (self.assetLibrary == nil) {
+        self.assetLibrary = [[ALAssetsLibrary alloc] init];
+    }
+    
     [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll 
                            usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
                                if (group == nil) 
@@ -71,7 +73,9 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
                                [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
                                
                                // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
-                               NSLog(@"count: %d for %@ (%@)", [group numberOfAssets], [group valueForProperty:ALAssetsGroupPropertyName] ,[group valueForProperty:ALAssetsGroupPropertyType]);
+                               // UH, what? A browse of the project's history shows that it's the [group numberOfAssets] call that was important
+                               // But a magic NSLog() call is a terrible plan
+                               // NSLog(@"count: %d for %@ (%@)", [group numberOfAssets], [group valueForProperty:ALAssetsGroupPropertyName], [group valueForProperty:ALAssetsGroupPropertyType]);
                                
                                // Reload albums
                                [self performSelectorOnMainThread:@selector(reloadTableView) 
@@ -166,7 +170,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     
 	assetTablePicker.parent = self;
 
-    // Move me    
+    // Move me
     assetTablePicker.assetGroup = [assetGroups objectAtIndex:indexPath.row];
     [assetTablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
     
