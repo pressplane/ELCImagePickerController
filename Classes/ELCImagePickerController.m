@@ -48,29 +48,25 @@
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 	
 	for(ALAsset *asset in _selectedAssets) {
+        NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] initWithCapacity:2];
+//        [workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType]
+//                              forKey:@"ALAssetPropertyType"];
         
-        @autoreleasepool {
-            
-			NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
-			[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType]
-                                  forKey:@"ALAssetPropertyType"];
-            
-            [workingDictionary setObject:(id)asset.defaultRepresentation.fullScreenImage
-                                  forKey:@"ALAssetFullScreenImageRef"];
-            
-			[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs]
-                                          valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys]
-                                                       objectAtIndex:0]]
-                                  forKey:@"ALAssetPropertyURL"];
-            
-            [workingDictionary setObject:asset.defaultRepresentation
-                                  forKey:@"ALAssetRepresentation"];
-            
-            [workingDictionary setObject:asset
-                                  forKey:@"ALAsset"];
-            
-			[returnArray addObject:workingDictionary];        
-        }
+//            [workingDictionary setObject:(id)asset.defaultRepresentation.fullScreenImage
+//                                  forKey:@"ALAssetFullScreenImageRef"];
+        
+//        [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs]
+//                                      valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys]
+//                                                   objectAtIndex:0]]
+//                              forKey:@"ALAssetPropertyURL"];
+        
+        [workingDictionary setObject:asset.defaultRepresentation
+                              forKey:@"ALAssetRepresentation"];
+        
+        [workingDictionary setObject:asset
+                              forKey:@"ALAsset"];
+        
+        [returnArray addObject:workingDictionary];
 	}
 
     return [returnArray copy];
