@@ -47,6 +47,9 @@
 
             [workingDictionary setObject:asset.defaultRepresentation
                                   forKey:@"ALAssetRepresentation"];
+            
+            [workingDictionary setObject:asset
+                                  forKey:@"ALAsset"];
 
 			[returnArray addObject:workingDictionary];        
         }
