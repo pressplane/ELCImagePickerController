@@ -237,14 +237,6 @@
     }
 }
 
--(void)scrollToBottom {
-
-    int lastRowNumber = [self tableView:nil numberOfRowsInSection:0] - 1;
-    if (lastRowNumber >= 0) {
-        NSIndexPath* ip = [NSIndexPath indexPathForRow:lastRowNumber inSection:0];
-        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionTop animated:NO];   
-    }
-}
 
 - (void)doneAction:(id)sender {
 	
