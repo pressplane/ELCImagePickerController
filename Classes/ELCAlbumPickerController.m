@@ -10,6 +10,13 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 
+@interface ELCAlbumPickerController ()
+
+- (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock;
+
+@end
+
+
 @implementation ELCAlbumPickerController
 
 @synthesize parent, assetGroups, assetLibrary;
@@ -25,8 +32,85 @@
     self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
     if (self) {
         self.assetLibrary = library;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
     return self;
+}
+
+
+// From the docs:
+// When you receive this notification, you should discard any cached information and query the assets library again.
+// You should consider invalid any ALAsset, ALAssetsGroup, or ALAssetRepresentation objects you are referencing
+// So, ask the parent to give us a new asset group and then reload data
+- (void)assetLibraryDidChange:(NSNotification *)notification
+{
+    NSInteger indexOfCurrentAssetGroup = NSNotFound;
+    if (self.assetTablePicker) {
+        indexOfCurrentAssetGroup = [self.assetGroups indexOfObject:self.assetTablePicker.assetGroup];
+    }
+    
+    [self loadAssetGroupsWithCompletionBlock:^{
+        if (indexOfCurrentAssetGroup != NSNotFound) {
+            ALAssetsGroup *newGroup = [self.assetGroups objectAtIndex:indexOfCurrentAssetGroup];
+            [newGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
+            [self.assetTablePicker resetAssetGroup:newGroup];
+        }
+    }];
+    
+    
+}
+
+- (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock
+{
+    self.assetGroups = [[NSMutableArray alloc] init];
+    
+    if (self.assetLibrary == nil) {
+        self.assetLibrary = [[ALAssetsLibrary alloc] init];
+    }
+    
+    [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+        // nil group indicates the enumeration has finished
+        if (group == nil)
+        {
+            [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
+            
+            // Reload albums
+            [self performSelectorOnMainThread:@selector(reloadTableView)
+                                   withObject:nil
+                                waitUntilDone:YES];
+            
+            if (completionBlock != nil) {
+                completionBlock();
+            }
+            return;
+        }
+
+        [self.assetGroups addObject:group];
+    } failureBlock:^(NSError *error) {
+        NSString *errorMessage;
+        NSString *errorTitle;
+        
+        // If we encounter a location services error, prompt the user to enable location services
+        if ([error code] == ALAssetsLibraryAccessUserDeniedError) {
+            errorMessage = [NSString stringWithFormat:@"It looks like you've disabled location services for this app. To add photos, enable \"Location Services\" for %@ in your device's \"Settings\" App.",[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]];
+            errorTitle = @"Oops!";
+        } else if ([error code] == ALAssetsLibraryAccessGloballyDeniedError) {
+            errorMessage = @"It looks like you've disabled location services on your device. To add photos, enable \"Location Services\" in your device's \"Settings\" App.";
+            errorTitle = @"Oops!";
+        } else {
+            errorMessage = [NSString stringWithFormat:@"Album Error: %@", [error localizedDescription]];
+            errorTitle = @"Error";
+        }
+
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:errorTitle
+                                                         message:errorMessage
+                                                        delegate:nil
+                                               cancelButtonTitle:@"Ok"
+                                               otherButtonTitles:nil];
+        [alert show];
+
+        NSLog(@"A problem occured %@", [error description]);
+    }];
 }
 
 #pragma mark -
@@ -56,61 +140,11 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	self.navigationItem.leftBarButtonItem = cancelButton;
 
-	self.assetGroups = [[NSMutableArray alloc] init];
-
-    if (self.assetLibrary == nil) {
-        self.assetLibrary = [[ALAssetsLibrary alloc] init];
-    }
-    
-    [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll 
-                           usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
-                               if (group == nil) 
-                               {
-                                   return;
-                               }
-                               
-                               [self.assetGroups addObject:group];
-                               [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
-                               
-                               // Keep this line!  w/o it the asset count is broken for some reason.  Makes no sense
-                               // UH, what? A browse of the project's history shows that it's the [group numberOfAssets] call that was important
-                               // But a magic NSLog() call is a terrible plan
-                               // NSLog(@"count: %d for %@ (%@)", [group numberOfAssets], [group valueForProperty:ALAssetsGroupPropertyName], [group valueForProperty:ALAssetsGroupPropertyType]);
-                               
-                               // Reload albums
-                               [self performSelectorOnMainThread:@selector(reloadTableView) 
-                                                      withObject:nil 
-                                                   waitUntilDone:YES];
-                           }
-                         failureBlock:^(NSError *error) {
-                             
-                             NSString *errorMessage;
-                             NSString *errorTitle;
-                             
-                             // If we encounter a location services error, prompt the user to enable location services
-                             if ([error code] == ALAssetsLibraryAccessUserDeniedError) {
-                                 errorMessage = [NSString stringWithFormat:@"It looks like you've disabled location services for this app. To add photos, enable \"Location Services\" for %@ in your device's \"Settings\" App.",[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]];
-                                 errorTitle = @"Oops!";
-                             } else if ([error code] == ALAssetsLibraryAccessGloballyDeniedError) {
-                                 errorMessage = @"It looks like you've disabled location services on your device. To add photos, enable \"Location Services\" in your device's \"Settings\" App.";
-                                 errorTitle = @"Oops!";
-                             } else {
-                                 errorMessage = [NSString stringWithFormat:@"Album Error: %@", [error localizedDescription]];
-                                 errorTitle = @"Error";
-                             }
-                             
-                             UIAlertView * alert = [[UIAlertView alloc] initWithTitle:errorTitle
-                                                                              message:errorMessage
-                                                                             delegate:nil 
-                                                                    cancelButtonTitle:@"Ok" 
-                                                                    otherButtonTitles:nil];
-                             [alert show];
-                             
-                             NSLog(@"A problem occured %@", [error description]);                                   
-                         }];
+    [self loadAssetGroupsWithCompletionBlock:nil];
 }
 
--(void)reloadTableView {
+-(void)reloadTableView
+{
 	
 	[self.tableView reloadData];
 }

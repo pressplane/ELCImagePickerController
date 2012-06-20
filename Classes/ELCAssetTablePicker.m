@@ -28,6 +28,16 @@
 @synthesize selectedAssetsLabel;
 @synthesize assetGroup, elcAssets;
 
+
+// called by ELCAlbumPickerController if it gets a library change notification
+- (void)resetAssetGroup:(ALAssetsGroup *)newAssetsGroup
+{
+    self.assetGroup = newAssetsGroup;
+    [self.tableView reloadData];
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+}
+
+
 -(void)viewDidLoad {
         
 	[self.tableView setSeparatorColor:[UIColor clearColor]];
@@ -69,78 +79,82 @@
 
 - (void)didReceiveMemoryWarning
 {
-    // thumbnails are cached for better scrolling performance
+    // thumbnails are cached for better scrolling performance, but this uses memory
     for (ELCAsset *asset in self.elcAssets) {
         asset.thumbnail = nil;
     }
 }
 
--(void)preparePhotos {
-    
+-(void)preparePhotos
+{
     @autoreleasepool {
-    
-    // Isn't happy on iOS 4, so just hardcoding it
-    // NSUInteger numberToLoad = [self.tableView indexPathsForVisibleRows].count * 4;
-    
-        NSInteger numberOfAssets = self.assetGroup.numberOfAssets;
-        NSInteger assetsPerRow = [self assetsPerRow];
-        NSUInteger numberToLoad;
-        
-        if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
-            numberToLoad = 10 * assetsPerRow;
-        } else {
-            numberToLoad = 6 * assetsPerRow;
-        }
-        
         @synchronized(self.elcAssets) {
-            [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
-             {
-                 // The controller is going away. Quit attempting to load more assets...
-                 if (controllerIsDisappearing) {
-                     *stop = YES;
-                     return;
-                 }
-                                  
-                 if(result == nil) {
-                     return;
-                 }
-                 
-                 ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
-                 [elcAsset setDelegate:self];
-                 
-                 // Mark all the selected assets
-                 if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs
-                      containsObject:elcAsset.asset.defaultRepresentation.url])
-                     elcAsset.selected = YES;
-
-                 [self.elcAssets addObject:elcAsset];
-                 
-                 // Get tableview into sync with the assets we've now loaded...
-                 NSInteger currentAssetCount = self.elcAssets.count;
-                 if (currentAssetCount <= numberToLoad) {
-                     // if we just finished doing the first row, scroll to it
-                     if (currentAssetCount == assetsPerRow) {
-                         [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
-                     }
-                     
-                     if (currentAssetCount == numberToLoad) {
-                         // reload the tableView once, when done with the current page
-                         // to ensure it's appearing correctly
-                         [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
-                         [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];
-                     }
-                 } else {
-                     // After the first screenful has loaded, notify that we finished a row.
-                     // This gives rows that got scrolled into view before their assets loaded a chance to update
-                     if ((numberOfAssets-currentAssetCount) % assetsPerRow == 0) {
-                         NSInteger currentRow = ceilf((float)(numberOfAssets-currentAssetCount) / assetsPerRow) + 1 /* it's the next row that is fully loaded */ + 1 /* header row */;
-                         [self performSelectorOnMainThread:@selector(finishedLoadingRow:) withObject:[NSIndexPath indexPathForRow:currentRow inSection:0]  waitUntilDone:YES];
-                     }
-                 }
-                 
-             }];
+            [self.elcAssets removeAllObjects];
+            
+            NSInteger numberOfAssets = self.assetGroup.numberOfAssets;
+            NSInteger assetsPerRow = [self assetsPerRow];
+            NSUInteger numberToLoad;
+            
+            if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
+                numberToLoad = 10 * assetsPerRow;
+            } else {
+                numberToLoad = 6 * assetsPerRow;
+            }
+            
+            [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
+                // The controller is going away. Quit attempting to load more assets...
+                if (controllerIsDisappearing) {
+                    *stop = YES;
+                    return;
+                }
+                
+                if(result == nil) {
+                    // finished enumerating
+                    // do some cleanup if the asset group didn't have enough items to fill a screen
+                    // TODO some minor duplication from below... could extract
+                    if (self.elcAssets.count <= numberToLoad) {
+                        [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+                        [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];
+                    }
+                    
+                    return;
+                }
+                
+                ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+                [elcAsset setDelegate:self];
+                    
+                // Mark all the selected assets
+                if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs containsObject:elcAsset.asset.defaultRepresentation.url]) {
+                    elcAsset.selected = YES;
+                }
+                
+                [self.elcAssets addObject:elcAsset];
+                
+                // Get tableview into sync with the assets we've now loaded...
+                NSInteger currentAssetCount = self.elcAssets.count;
+                if (currentAssetCount <= numberToLoad) {
+                    // if we just finished doing the first row, scroll to it
+                    if (currentAssetCount == assetsPerRow) {
+                        [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
+                    }
+                    
+                    if (currentAssetCount == numberToLoad) {
+                        // reload the tableView once, when done with the current page
+                        // could always reload row by row, but on the first screenful, that looks pretty terrible
+                        [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+                        [self.navigationItem performSelectorOnMainThread:@selector(setTitle:) withObject:@"Select Photos" waitUntilDone:YES];
+                    }
+                } else {
+                    // After the first screenful has loaded, notify that we finished a row.
+                    // This gives rows that got scrolled into view before their assets loaded a chance to update
+                    if ((numberOfAssets-currentAssetCount) % assetsPerRow == 0) {
+                        NSInteger currentRow = ceilf((float)(numberOfAssets-currentAssetCount) / assetsPerRow) + 1 /* it's the next row that is fully loaded */ + 1 /* header row */;
+                        [self performSelectorOnMainThread:@selector(finishedLoadingRow:) withObject:[NSIndexPath indexPathForRow:currentRow inSection:0]  waitUntilDone:YES];
+                    }
+                }
+            }];
         }
-
+        
         self.navigationItem.title = @"Select Photos";
     }
 }
@@ -148,7 +162,7 @@
 - (void)finishedLoadingRow:(NSIndexPath *)row
 {
     if ([[self.tableView indexPathsForVisibleRows] containsObject:row]) {
-        [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:row] withRowAnimation:UITableViewRowAnimationNone];
+        [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:row] withRowAnimation:UITableViewRowAnimationFade];
     }
 }
 
@@ -374,13 +388,13 @@
     
     int count = 0;
     
-    @synchronized(self.elcAssets) {
-        for(ELCAsset *asset in self.elcAssets) 
+    // self.elcAssets may be getting mutated on bg thread so make a copy
+    NSArray *tempAssets = [self.elcAssets copy];
+    for(ELCAsset *asset in tempAssets)
+    {
+        if(asset.selected)
         {
-            if(asset.selected)
-            {
-                count++;
-            }
+            count++;
         }
     }
     

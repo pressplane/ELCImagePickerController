@@ -22,6 +22,8 @@
 @property (nonatomic, strong) NSMutableArray *elcAssets;
 @property (nonatomic, strong) IBOutlet UILabel *selectedAssetsLabel;
 
+- (void)resetAssetGroup:(ALAssetsGroup *)newAssetsGroup;
+
 -(int)totalSelectedAssets;
 -(void)preparePhotos;
 

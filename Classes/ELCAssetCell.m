@@ -24,7 +24,7 @@
 {    
 	if(self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:_identifier]) {
         assetsPerRow = perRow;
-		self.rowAssets = _assets;
+        [self setAssets:_assets];
 	}
 	
 	return self;
