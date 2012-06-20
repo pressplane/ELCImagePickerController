@@ -14,6 +14,7 @@
 
 @interface ELCAssetTablePicker() {
     BOOL controllerIsDisappearing;
+    dispatch_once_t updateSelectedToken;
 }
 
 - (void)scrollTableViewToBottom;
@@ -38,8 +39,8 @@
 }
 
 
--(void)viewDidLoad {
-        
+-(void)viewDidLoad
+{        
 	[self.tableView setSeparatorColor:[UIColor clearColor]];
 	[self.tableView setAllowsSelection:NO];
 
@@ -68,8 +69,12 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
-    // this is used to tell preparePhotos to stop if it's still going...
+    // this is used to tell preparePhotos to stop if it's still going
     controllerIsDisappearing = YES;
+    
+    // since ELCAssetTablePicker never pushes another view controller onto its navigation controller,
+    // disappearing always means being popped
+    [self updateSelected];
     
     self.assetGroup = nil;
     self.parent = nil;
@@ -241,7 +246,8 @@
     }
 }
 
-- (void)scrollTableViewToBottom {
+- (void)scrollTableViewToBottom
+{
     
     int lastRowIndex = [self tableView:nil numberOfRowsInSection:0] - 1;
     if (lastRowIndex >= 0) {
@@ -252,19 +258,30 @@
 }
 
 
-- (void)doneAction:(id)sender {
-	
-	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
-	    
-	for(ELCAsset *elcAsset in self.elcAssets) 
-    {		
-		if([elcAsset selected]) {
-			
-			[selectedAssetsImages addObject:[elcAsset asset]];
-		}
-	}
+- (void)updateSelected
+{
+    dispatch_once(&updateSelectedToken, ^{
+        NSMutableArray *selected = [[NSMutableArray alloc] init];
+        NSMutableArray *unselected = [[NSMutableArray alloc] initWithCapacity:self.elcAssets.count];
         
-    [(ELCAlbumPickerController*)self.parent selectedAssets:selectedAssetsImages];
+        for(ELCAsset *elcAsset in self.elcAssets)
+        {
+            ALAsset *asset = elcAsset.asset;
+            if([elcAsset selected]) {
+                [selected addObject:asset];
+            } else {
+                [unselected addObject:asset];
+            }
+        }
+        
+        [(ELCAlbumPickerController*)self.parent updateAssetsSelected:selected unselected:unselected];
+    });
+}
+
+- (void)doneAction:(id)sender
+{
+    [self updateSelected];
+    [(ELCAlbumPickerController*)self.parent finishPicking];
 }
 
 - (NSInteger)assetsPerRow
@@ -278,19 +295,21 @@
 
 #pragma mark UITableViewDataSource Delegate Methods
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
     
     // Add two rows for padding at the top and bottom of each section
     return ceil(((CGFloat)[self.assetGroup numberOfAssets]) / ((CGFloat)[self assetsPerRow])) + 2;
 }
 
-// ugly
--(NSArray*)assetsForIndexPath:(NSIndexPath*)_indexPath {
+
+- (NSArray*)assetsForIndexPath:(NSIndexPath*)_indexPath
+{
     
     int index = (self.assetGroup.numberOfAssets-1)-(_indexPath.row*[self assetsPerRow]);
     

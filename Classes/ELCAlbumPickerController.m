@@ -138,7 +138,9 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(finishPicking)];
 	self.navigationItem.leftBarButtonItem = cancelButton;
+    self.navigationItem.rightBarButtonItem = doneButton;
 
     [self loadAssetGroupsWithCompletionBlock:nil];
 }
@@ -149,9 +151,25 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 	[self.tableView reloadData];
 }
 
--(void)selectedAssets:(NSArray*)_assets {
-	
-	[(ELCImagePickerController*)parent selectedAssets:_assets];
+- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected
+{
+	[(ELCImagePickerController*)parent updateAssetsSelected:selected unselected:unselected];
+    
+    // Now, update alreadySelectedUrls so selection state can be preserved.
+    // TODO would be much better to combine this with ELCImagePickerController's tracking of selected assets
+    NSMutableSet *newAlreadySelected = [self.alreadySelectedURLs mutableCopy];
+    for (ALAsset *asset in unselected) {
+        [newAlreadySelected removeObject:asset.defaultRepresentation.url];
+    }
+    for (ALAsset *asset in selected) {
+        [newAlreadySelected addObject:asset.defaultRepresentation.url];
+    }
+    self.alreadySelectedURLs = newAlreadySelected;
+}
+
+- (void)finishPicking
+{
+    [(ELCImagePickerController *)parent finishImagePicker];
 }
 
 #pragma mark -

@@ -10,7 +10,6 @@
 @class ELCAssetTablePicker, ALAssetsLibrary;
 
 @interface ELCAlbumPickerController : UITableViewController {
-	
 	NSMutableArray *assetGroups;
 	NSOperationQueue *queue;
     
@@ -25,12 +24,13 @@
 
 @property (nonatomic) ELCAssetTablePicker *assetTablePicker;
 
-@property (nonatomic, strong) NSArray *alreadySelectedURLs;
+@property (nonatomic, strong) NSSet *alreadySelectedURLs;
 
 // Provide our own asset library so the Asset URLs will live on!
 - (id)initWithAssetLibrary:(ALAssetsLibrary *)library;
 
--(void)selectedAssets:(NSArray*)_assets;
+- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
+- (void)finishPicking;
 
 @end
 

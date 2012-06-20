@@ -9,14 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @interface ELCImagePickerController : UINavigationController {
-
 	id __unsafe_unretained delegate;
 }
 
 @property (nonatomic, unsafe_unretained) id delegate;
 
--(void)selectedAssets:(NSArray*)_assets;
--(void)cancelImagePicker;
+- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
+- (void)cancelImagePicker;
+- (void)finishImagePicker;
 
 @end
 
