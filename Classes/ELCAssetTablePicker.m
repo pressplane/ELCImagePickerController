@@ -185,7 +185,7 @@
         self.navigationItem.title = [NSString stringWithFormat:@"%i Photos", totalSelectedAssets];
     }
     
-    if (totalSelectedAssets > 20) {
+    if (totalSelectedAssets > 100) {
          
         self.navigationItem.rightBarButtonItem.enabled = NO;
         
