@@ -9,12 +9,15 @@
 #import "ELCAssetCell.h"
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
+#import "SVProgressHUD.h"
 
 #define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define MAX_BATCH_SIZE 20
 
 @interface ELCAssetTablePicker() {
     BOOL controllerIsDisappearing;
     dispatch_once_t updateSelectedToken;
+    int _previousSelectionCount;
 }
 
 - (void)scrollTableViewToBottom;
@@ -59,6 +62,7 @@
     } else {
         [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     }
+    _previousSelectionCount = 0;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -185,8 +189,13 @@
         self.navigationItem.title = [NSString stringWithFormat:@"%i Photos", totalSelectedAssets];
     }
     
-    if (totalSelectedAssets > 100) {
-         
+    if (totalSelectedAssets > MAX_BATCH_SIZE) {
+        if (totalSelectedAssets > _previousSelectionCount)
+        {
+            [SVProgressHUD show];
+            [SVProgressHUD dismissWithError:[NSString stringWithFormat:@"Maximum upload size reached. %d per batch please", MAX_BATCH_SIZE]];
+        }
+        
         self.navigationItem.rightBarButtonItem.enabled = NO;
         
         if (SYSTEM_VERSION_LESS_THAN(@"5.0")) {
@@ -244,6 +253,7 @@
             [self.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
         }
     }
+    _previousSelectionCount = totalSelectedAssets;
 }
 
 - (void)scrollTableViewToBottom
