@@ -10,16 +10,17 @@
 
 @implementation ELCAsset
 
-@synthesize asset;
+@synthesize url;
 @synthesize delegate;
 
 @synthesize thumbnail;
 @synthesize selected;
 
--(id)initWithAsset:(ALAsset*)_asset {
+-(id)initWithAsset:(ALAsset*)asset {
 	
 	if (self = [super initWithFrame:CGRectMake(0, 0, 0, 0)]) {
-		self.asset = _asset;
+		self->_asset = asset;
+        self.url = asset.defaultRepresentation.url;
     }
     
 	return self;
@@ -37,7 +38,7 @@
 - (UIImage *)thumbnail
 {
     if (!thumbnail) {
-        thumbnail = [UIImage imageWithCGImage:self.asset.thumbnail];
+        thumbnail = [UIImage imageWithCGImage:self->_asset.thumbnail];
     }
     return thumbnail;
 }

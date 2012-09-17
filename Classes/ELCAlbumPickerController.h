@@ -22,7 +22,7 @@
 @property (nonatomic, strong) ALAssetsLibrary *assetLibrary;
 @property (nonatomic, strong) NSMutableArray *assetGroups;
 
-@property (nonatomic) ELCAssetTablePicker *assetTablePicker;
+@property (nonatomic, strong) ELCAssetTablePicker *assetTablePicker;
 
 @property (nonatomic, strong) NSSet *alreadySelectedURLs;
 

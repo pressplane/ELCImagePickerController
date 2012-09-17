@@ -133,7 +133,7 @@
                 [elcAsset setDelegate:self];
                     
                 // Mark all the selected assets
-                if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs containsObject:elcAsset.asset.defaultRepresentation.url]) {
+                if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs containsObject:elcAsset.url]) {
                     elcAsset.selected = YES;
                 }
                 
@@ -276,11 +276,11 @@
         
         for(ELCAsset *elcAsset in self.elcAssets)
         {
-            ALAsset *asset = elcAsset.asset;
+            //ALAsset *asset = elcAsset.asset;
             if([elcAsset selected]) {
-                [selected addObject:asset];
+                [selected addObject:elcAsset.url];
             } else {
-                [unselected addObject:asset];
+                [unselected addObject:elcAsset.url];
             }
         }
         

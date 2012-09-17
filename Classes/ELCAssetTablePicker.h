@@ -1,3 +1,4 @@
+
 //
 //  AssetTablePicker.h
 //
@@ -11,7 +12,7 @@
 
 @interface ELCAssetTablePicker : UITableViewController <ELCAssetProtocol>
 {	
-	NSMutableArray *elcAssets;
+	/* NSMutableArray *elcAssets; */
 	int selectedAssets;
 		
 	NSOperationQueue *queue;

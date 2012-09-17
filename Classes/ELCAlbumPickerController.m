@@ -11,7 +11,9 @@
 #import "ELCAssetTablePicker.h"
 
 @interface ELCAlbumPickerController ()
-
+{
+    int curIdx;
+}
 - (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock;
 
 @end
@@ -31,6 +33,7 @@
 {
     self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
     if (self) {
+        [GoogleTracker recordAlloc:self];
         self.assetLibrary = library;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
@@ -46,14 +49,24 @@
 {
     NSInteger indexOfCurrentAssetGroup = NSNotFound;
     if (self.assetTablePicker) {
-        indexOfCurrentAssetGroup = [self.assetGroups indexOfObject:self.assetTablePicker.assetGroup];
+        // indexOfCurrentAssetGroup = [self.assetGroups indexOfObject:self.assetTablePicker.assetGroup];
+        indexOfCurrentAssetGroup = self->curIdx;
     }
     
     [self loadAssetGroupsWithCompletionBlock:^{
         if (indexOfCurrentAssetGroup != NSNotFound) {
             ALAssetsGroup *newGroup = [self.assetGroups objectAtIndex:indexOfCurrentAssetGroup];
             [newGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
-            [self.assetTablePicker resetAssetGroup:newGroup];
+            if (self.assetTablePicker.isViewLoaded && self.assetTablePicker.view.window)
+            {
+                [self.assetTablePicker performSelectorOnMainThread:@selector(resetAssetGroup:)
+                                                        withObject:newGroup
+                                                     waitUntilDone:YES];
+            }
+            else
+            {
+                [self.assetTablePicker resetAssetGroup:newGroup];
+            }
         }
     }];
     
@@ -68,16 +81,25 @@
         self.assetLibrary = [[ALAssetsLibrary alloc] init];
     }
     
-    [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+    int libraryGroupTypes = ALAssetsGroupLibrary | ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupSavedPhotos;
+    //[self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+    [self.assetLibrary enumerateGroupsWithTypes:libraryGroupTypes usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         // nil group indicates the enumeration has finished
         if (group == nil)
         {
             [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
             
             // Reload albums
-            [self performSelectorOnMainThread:@selector(reloadTableView)
-                                   withObject:nil
-                                waitUntilDone:YES];
+            if (self.isViewLoaded && self.view.window)
+            {
+                [self performSelectorOnMainThread:@selector(reloadTableView)
+                                       withObject:nil
+                                    waitUntilDone:YES];
+            }
+            else
+            {
+                [self reloadTableView];
+            }
             
             if (completionBlock != nil) {
                 completionBlock();
@@ -158,11 +180,11 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     // Now, update alreadySelectedUrls so selection state can be preserved.
     // TODO would be much better to combine this with ELCImagePickerController's tracking of selected assets
     NSMutableSet *newAlreadySelected = [self.alreadySelectedURLs mutableCopy];
-    for (ALAsset *asset in unselected) {
-        [newAlreadySelected removeObject:asset.defaultRepresentation.url];
+    for (NSURL *assetUrl in unselected) {
+        [newAlreadySelected removeObject:assetUrl];
     }
-    for (ALAsset *asset in selected) {
-        [newAlreadySelected addObject:asset.defaultRepresentation.url];
+    for (NSURL *assetUrl in selected) {
+        [newAlreadySelected addObject:assetUrl];
     }
     self.alreadySelectedURLs = newAlreadySelected;
 }
@@ -205,7 +227,8 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     cell.textLabel.text = [NSString stringWithFormat:@"%@",[g valueForProperty:ALAssetsGroupPropertyName]];
     cell.detailTextLabel.text = [NSString stringWithFormat:@"(%d)",gCount];
     cell.detailTextLabel.textColor = [UIColor grayColor];
-    [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[assetGroups objectAtIndex:indexPath.row] posterImage]]];
+    // [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[assetGroups objectAtIndex:indexPath.row] posterImage]]];
+    [cell.imageView setImage:[UIImage imageWithCGImage:[g posterImage]]];
 	[cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 	
     return cell;
@@ -215,17 +238,31 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 #pragma mark Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	
-    ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
+    ALAssetsGroup *newGroup;
+    if (assetGroups != nil && [assetGroups count] > indexPath.row)
+    {
+        self->curIdx = indexPath.row;
+        newGroup = [assetGroups objectAtIndex:self->curIdx];
+    }
+    else
+    {
+        return;
+    }
+
+    // ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
     
-	self.assetTablePicker = tempAssetTablePicker;
-    
-	assetTablePicker.parent = self;
+	// self.assetTablePicker = tempAssetTablePicker;
+	// assetTablePicker.parent = self;
+
+    if (self.assetTablePicker == nil)
+    {
+        self.assetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
+    	self.assetTablePicker.parent = self;
+    }
 
     // Move me
-    assetTablePicker.assetGroup = [assetGroups objectAtIndex:indexPath.row];
+    assetTablePicker.assetGroup = newGroup;
     [assetTablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
-    
 	[self.navigationController pushViewController:assetTablePicker animated:YES];
 //	[picker release];
 }
@@ -253,7 +290,8 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 - (void)dealloc 
 {	
 //	[assetGroups release];
-    
+    [GoogleTracker recordDealloc:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
     
     self.assetTablePicker.assetGroup = nil;
     

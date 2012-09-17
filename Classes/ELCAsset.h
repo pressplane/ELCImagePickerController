@@ -11,13 +11,15 @@
 @protocol ELCAssetProtocol;
 
 @interface ELCAsset : UIView {
-	ALAsset *asset;
+	ALAsset *_asset;
+        NSURL *url;
 	UIImageView *overlayView;
 	BOOL selected;
 	id parent;
 }
 
-@property (nonatomic) ALAsset *asset;
+//@property (nonatomic) ALAsset *asset;
+@property (nonatomic) NSURL *url;
 @property (nonatomic, unsafe_unretained) id<ELCAssetProtocol> delegate;
 @property (nonatomic) BOOL selected;
 @property (nonatomic, strong) UIImage *thumbnail;
