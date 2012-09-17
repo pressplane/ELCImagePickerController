@@ -33,7 +33,6 @@
 {
     self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
     if (self) {
-        [GoogleTracker recordAlloc:self];
         self.assetLibrary = library;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
@@ -290,7 +289,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 - (void)dealloc 
 {	
 //	[assetGroups release];
-    [GoogleTracker recordDealloc:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
     
     self.assetTablePicker.assetGroup = nil;
