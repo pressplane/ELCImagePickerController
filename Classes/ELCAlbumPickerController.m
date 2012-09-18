@@ -81,9 +81,9 @@
         self.assetLibrary = [[ALAssetsLibrary alloc] init];
     }
     
-    int libraryGroupTypes = ALAssetsGroupLibrary | ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupSavedPhotos;
-    //[self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
-    [self.assetLibrary enumerateGroupsWithTypes:libraryGroupTypes usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+    // int libraryGroupTypes = ALAssetsGroupLibrary | ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupSavedPhotos;
+    // [self.assetLibrary enumerateGroupsWithTypes:libraryGroupTypes usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+    [self.assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         // nil group indicates the enumeration has finished
         if (group == nil)
         {
