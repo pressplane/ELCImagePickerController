@@ -74,7 +74,8 @@
 
 - (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock
 {
-    self.assetGroups = [[NSMutableArray alloc] init];
+    //self.assetGroups = [[NSMutableArray alloc] init];
+    NSMutableArray *loadingGroups = [[NSMutableArray alloc] init];
     
     if (self.assetLibrary == nil) {
         self.assetLibrary = [[ALAssetsLibrary alloc] init];
@@ -86,27 +87,35 @@
         // nil group indicates the enumeration has finished
         if (group == nil)
         {
-            [self.assetGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
-            
+            [loadingGroups sortUsingFunction:compareGroupsUsingSelector context:nil];
+            self.assetGroups = loadingGroups;
+
             // Reload albums
             if (self.isViewLoaded && self.view.window)
             {
                 [self performSelectorOnMainThread:@selector(reloadTableView)
                                        withObject:nil
                                     waitUntilDone:YES];
+
+                if (completionBlock != nil) 
+                {
+                    completionBlock();
+                }
             }
             else
             {
+                if (completionBlock != nil) 
+                {
+                    completionBlock();
+                }
+
                 [self reloadTableView];
             }
             
-            if (completionBlock != nil) {
-                completionBlock();
-            }
             return;
         }
 
-        [self.assetGroups addObject:group];
+        [loadingGroups addObject:group];
     } failureBlock:^(NSError *error) {
         NSString *errorMessage;
         NSString *errorTitle;
@@ -168,7 +177,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 
 -(void)reloadTableView
 {
-	
 	[self.tableView reloadData];
 }
 
@@ -204,7 +212,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     // Return the number of rows in the section.
-    return [assetGroups count];
+    return (assetGroups == nil) ? 0 : [assetGroups count];
 }
 
 
@@ -248,16 +256,9 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
         return;
     }
 
-    // ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
-    
-	// self.assetTablePicker = tempAssetTablePicker;
-	// assetTablePicker.parent = self;
-
-    if (self.assetTablePicker == nil)
-    {
-        self.assetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
-    	self.assetTablePicker.parent = self;
-    }
+    ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
+	self.assetTablePicker = tempAssetTablePicker;
+	assetTablePicker.parent = self;
 
     // Move me
     assetTablePicker.assetGroup = newGroup;

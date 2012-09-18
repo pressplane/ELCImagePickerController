@@ -9,7 +9,6 @@
 #import "ELCImagePickerController.h"
 #import "ELCAsset.h"
 #import "ELCAssetCell.h"
-#import "ELCAssetTablePicker.h"
 #import "ELCAlbumPickerController.h"
 
 #import "UIImage+ScaleAndRotate.h"
@@ -50,17 +49,6 @@
 	// for(ALAsset *asset in _selectedAssets) {
 	for(NSURL *url in _selectedAssets) {
         NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] initWithCapacity:2];
-//        [workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType]
-//                              forKey:@"ALAssetPropertyType"];
-        
-//            [workingDictionary setObject:(id)asset.defaultRepresentation.fullScreenImage
-//                                  forKey:@"ALAssetFullScreenImageRef"];
-        
-//        [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs]
-//                                      valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys]
-//                                                   objectAtIndex:0]]
-//                              forKey:@"ALAssetPropertyURL"];
-        
         // [workingDictionary setObject:asset.defaultRepresentation
         //                       forKey:@"ALAssetRepresentation"];
         
@@ -75,24 +63,6 @@
     return [returnArray copy];
 }
 
-// - (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected
-// {
-//     if (!_selectedAssets) {
-//         _selectedAssets = [[NSMutableArray alloc] initWithCapacity:selected.count];
-//     }
-    
-//     // remove any assets that are in the selected list but present in unselected
-//     // (these will be assets that the user unchecked)
-//     // this is O(n*m), so will suck if you have big groups and lots of selections,
-//     // if that becomes a problem the thing to do is keep more precise track of unselections and just send those, not the entire group
-//     for (ALAsset *asset in _selectedAssets) {
-//         if ([unselected containsObject:asset]) {
-//             [_selectedAssets removeObject:asset];
-//         }
-//     }
-    
-//     [_selectedAssets addObjectsFromArray:selected];
-// }
 - (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected
 {
     if (!_selectedAssets) {
