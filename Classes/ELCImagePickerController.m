@@ -73,7 +73,8 @@
     // (these will be assets that the user unchecked)
     // this is O(n*m), so will suck if you have big groups and lots of selections,
     // if that becomes a problem the thing to do is keep more precise track of unselections and just send those, not the entire group
-    for (NSURL *url in _selectedAssets) {
+    NSArray *previouslySelectedAssets = [NSArray arrayWithArray:_selectedAssets]; // don't mutate the array we're enumerating
+    for (NSURL *url in previouslySelectedAssets) {
         if ([unselected containsObject:url]) {
             [_selectedAssets removeObject:url];
         }

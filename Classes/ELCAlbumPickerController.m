@@ -14,7 +14,9 @@
 {
     int _maxBatchSize;
     int curIdx;
+    BOOL _isVisible;
 }
+
 - (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock;
 
 @end
@@ -72,6 +74,11 @@
     }];
     
     
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    _isVisible = YES;
 }
 
 - (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock
@@ -248,8 +255,15 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     ALAssetsGroup *newGroup;
+
+    if (!self->_isVisible) // without this check, this methods could fire multiple times, pushing many copies of the same type of view controller.
+    {
+        return;
+    }
+
     if (assetGroups != nil && [assetGroups count] > indexPath.row)
     {
+        self->_isVisible = NO;
         self->curIdx = indexPath.row;
         newGroup = [assetGroups objectAtIndex:self->curIdx];
     }
@@ -263,7 +277,6 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 	self.assetTablePicker = tempAssetTablePicker;
 	assetTablePicker.parent = self;
 
-    // Move me
     assetTablePicker.assetGroup = newGroup;
     [assetTablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
 	[self.navigationController pushViewController:assetTablePicker animated:YES];
