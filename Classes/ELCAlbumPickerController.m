@@ -12,6 +12,7 @@
 
 @interface ELCAlbumPickerController ()
 {
+    int _maxBatchSize;
     int curIdx;
 }
 - (void)loadAssetGroupsWithCompletionBlock:(void (^)(void))completionBlock;
@@ -29,10 +30,11 @@
 
 #pragma mark - Init
 
-- (id)initWithAssetLibrary:(ALAssetsLibrary *)library
+- (id)initWithAssetLibrary:(ALAssetsLibrary *)library  maxBatchSize:(int)batchSize
 {
     self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
     if (self) {
+        _maxBatchSize = batchSize;
         self.assetLibrary = library;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
@@ -257,6 +259,7 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     }
 
     ELCAssetTablePicker *tempAssetTablePicker = [[ELCAssetTablePicker alloc] initWithNibName:@"ELCAssetTablePicker" bundle:[NSBundle mainBundle]];
+    tempAssetTablePicker.maxBatchSize = _maxBatchSize;
 	self.assetTablePicker = tempAssetTablePicker;
 	assetTablePicker.parent = self;
 

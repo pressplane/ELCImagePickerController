@@ -22,6 +22,7 @@
 @property (nonatomic, strong) ALAssetsGroup *assetGroup;
 @property (nonatomic, strong) NSMutableArray *elcAssets;
 @property (nonatomic, strong) IBOutlet UILabel *selectedAssetsLabel;
+@property (nonatomic, assign) int maxBatchSize;
 
 - (void)resetAssetGroup:(ALAssetsGroup *)newAssetsGroup;
 
@@ -29,5 +30,4 @@
 -(void)preparePhotos;
 
 -(void)doneAction:(id)sender;
-
 @end

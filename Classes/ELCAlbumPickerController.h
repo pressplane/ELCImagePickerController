@@ -27,7 +27,7 @@
 @property (nonatomic, strong) NSSet *alreadySelectedURLs;
 
 // Provide our own asset library so the Asset URLs will live on!
-- (id)initWithAssetLibrary:(ALAssetsLibrary *)library;
+- (id)initWithAssetLibrary:(ALAssetsLibrary *)library maxBatchSize:(int)batchSize;
 
 - (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
 - (void)finishPicking;

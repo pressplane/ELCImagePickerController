@@ -12,7 +12,7 @@
 #import "SVProgressHUD.h"
 
 #define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
-#define MAX_BATCH_SIZE 20
+#define DEFAULT_MAX_BATCH_SIZE 20
 
 @interface ELCAssetTablePicker() {
     BOOL controllerIsDisappearing;
@@ -31,7 +31,7 @@
 @synthesize parent;
 @synthesize selectedAssetsLabel;
 @synthesize assetGroup, elcAssets;
-
+@synthesize maxBatchSize;
 
 // called by ELCAlbumPickerController if it gets a library change notification
 - (void)resetAssetGroup:(ALAssetsGroup *)newAssetsGroup
@@ -189,11 +189,11 @@
         self.navigationItem.title = [NSString stringWithFormat:@"%i Photos", totalSelectedAssets];
     }
     
-    if (totalSelectedAssets > MAX_BATCH_SIZE) {
+    if (totalSelectedAssets > self.maxBatchSize) {
         if (totalSelectedAssets > _previousSelectionCount)
         {
             [SVProgressHUD show];
-            [SVProgressHUD dismissWithError:[NSString stringWithFormat:@"Maximum upload size reached. %d per batch please", MAX_BATCH_SIZE]];
+            [SVProgressHUD dismissWithError:[NSString stringWithFormat:@"Maximum upload size reached. %d per batch please", self.maxBatchSize]];
         }
         
         self.navigationItem.rightBarButtonItem.enabled = NO;
@@ -429,6 +429,5 @@
     
     return count;
 }
-
 
 @end
