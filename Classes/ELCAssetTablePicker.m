@@ -177,7 +177,7 @@
 
 - (void)assetSelected:(ELCAsset*)asset
 {
-    NSLog(@"total selected assets: %i", [self totalSelectedAssets]);
+    //    NSLog(@"total selected assets: %i", [self totalSelectedAssets]);
     
     int totalSelectedAssets = [self totalSelectedAssets];
     
