@@ -14,7 +14,6 @@
 #import "UIImage+ScaleAndRotate.h"
 
 @interface ELCImagePickerController () {
-    NSMutableArray *_selectedAssets;
 }
 @end
 
@@ -30,58 +29,34 @@
 	}
 }
 
-- (void)finishImagePicker
+- (void)finishImagePicker:(NSSet*)selectedUrls
 {
     // original version did this stuff but it's not necessary
     //    [self popToRootViewControllerAnimated:NO];
     //    [[self parentViewController] dismissModalViewControllerAnimated:YES];
 	
     if([delegate respondsToSelector:@selector(elcImagePickerController:didFinishPickingMediaWithInfo:)]) {
-		[delegate performSelector:@selector(elcImagePickerController:didFinishPickingMediaWithInfo:) withObject:self withObject:[self returnArray]];
+		[delegate performSelector:@selector(elcImagePickerController:didFinishPickingMediaWithInfo:)
+                       withObject:self
+                       withObject:[self returnArray:selectedUrls]];
 	}
 }
 
-// builds the array of info dictionaries to return
-- (NSArray *)returnArray
+
+- (NSArray *)returnArray:(NSSet*)selectedUrls
 {
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 	
-	// for(ALAsset *asset in _selectedAssets) {
-	for(NSURL *url in _selectedAssets) {
-        NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] initWithCapacity:2];
-        // [workingDictionary setObject:asset.defaultRepresentation
-        //                       forKey:@"ALAssetRepresentation"];
-        
-        // [workingDictionary setObject:asset
-        //                       forKey:@"ALAsset"];
-
+	for (NSURL *url in selectedUrls) 
+    {
+        NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] initWithCapacity:1];
         [workingDictionary setObject:url forKey:@"URL"];
-        
         [returnArray addObject:workingDictionary];
 	}
 
     return [returnArray copy];
 }
 
-- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected
-{
-    if (!_selectedAssets) {
-        _selectedAssets = [[NSMutableArray alloc] initWithCapacity:selected.count];
-    }
-    
-    // remove any assets that are in the selected list but present in unselected
-    // (these will be assets that the user unchecked)
-    // this is O(n*m), so will suck if you have big groups and lots of selections,
-    // if that becomes a problem the thing to do is keep more precise track of unselections and just send those, not the entire group
-    NSArray *previouslySelectedAssets = [NSArray arrayWithArray:_selectedAssets]; // don't mutate the array we're enumerating
-    for (NSURL *url in previouslySelectedAssets) {
-        if ([unselected containsObject:url]) {
-            [_selectedAssets removeObject:url];
-        }
-    }
-    
-    [_selectedAssets addObjectsFromArray:selected];
-}
 
 #pragma mark -
 #pragma mark Memory management

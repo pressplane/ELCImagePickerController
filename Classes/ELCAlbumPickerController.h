@@ -24,13 +24,18 @@
 
 @property (nonatomic, strong) ELCAssetTablePicker *assetTablePicker;
 
-@property (nonatomic, strong) NSSet *alreadySelectedURLs;
+@property (nonatomic, strong) NSMutableSet *alreadySelectedURLs;
 
 // Provide our own asset library so the Asset URLs will live on!
 - (id)initWithAssetLibrary:(ALAssetsLibrary *)library maxBatchSize:(int)batchSize;
 
-- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
+// - (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
 - (void)finishPicking;
+
+
+-(int)totalSelected;
+-(void)select:(NSURL*)url;
+-(void)deselect:(NSURL*)url;
 
 @end
 

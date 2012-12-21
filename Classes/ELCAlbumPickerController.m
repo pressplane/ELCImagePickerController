@@ -27,7 +27,7 @@
 @synthesize parent, assetGroups, assetLibrary;
 
 @synthesize assetTablePicker;
-@synthesize alreadySelectedURLs;
+@synthesize alreadySelectedURLs = _alreadySelectedURLs;
 
 
 #pragma mark - Init
@@ -37,6 +37,7 @@
     self = [super initWithNibName:nil bundle:[NSBundle mainBundle]];
     if (self) {
         _maxBatchSize = batchSize;
+        _alreadySelectedURLs = [[NSMutableSet alloc] init];
         self.assetLibrary = library;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
@@ -189,25 +190,10 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
 	[self.tableView reloadData];
 }
 
-- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected
-{
-	[(ELCImagePickerController*)parent updateAssetsSelected:selected unselected:unselected];
-    
-    // Now, update alreadySelectedUrls so selection state can be preserved.
-    // TODO would be much better to combine this with ELCImagePickerController's tracking of selected assets
-    NSMutableSet *newAlreadySelected = [self.alreadySelectedURLs mutableCopy];
-    for (NSURL *assetUrl in unselected) {
-        [newAlreadySelected removeObject:assetUrl];
-    }
-    for (NSURL *assetUrl in selected) {
-        [newAlreadySelected addObject:assetUrl];
-    }
-    self.alreadySelectedURLs = newAlreadySelected;
-}
 
 - (void)finishPicking
 {
-    [(ELCImagePickerController *)parent finishImagePicker];
+    [(ELCImagePickerController *)parent finishImagePicker:[_alreadySelectedURLs copy]];
 }
 
 #pragma mark -
@@ -311,6 +297,23 @@ static int compareGroupsUsingSelector(id p1, id p2, void *context)
     self.assetTablePicker.assetGroup = nil;
     
     
+}
+
+#pragma mark -
+#pragma mark manage selections
+- (int)totalSelected
+{
+    return [_alreadySelectedURLs count];
+}
+
+-(void)select:(NSURL*)url
+{
+    [_alreadySelectedURLs addObject:url];
+}
+
+-(void)deselect:(NSURL*)url
+{
+    [_alreadySelectedURLs removeObject:url];
 }
 
 @end

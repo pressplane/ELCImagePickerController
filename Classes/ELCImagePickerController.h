@@ -14,9 +14,8 @@
 
 @property (nonatomic, unsafe_unretained) id delegate;
 
-- (void)updateAssetsSelected:(NSArray*)selected unselected:(NSArray *)unselected;
 - (void)cancelImagePicker;
-- (void)finishImagePicker;
+- (void)finishImagePicker:(NSSet*)selectedUrls;
 
 @end
 

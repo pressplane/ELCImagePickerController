@@ -16,7 +16,6 @@
 
 @interface ELCAssetTablePicker() {
     BOOL controllerIsDisappearing;
-    dispatch_once_t updateSelectedToken;
     int _previousSelectionCount;
 }
 
@@ -78,7 +77,7 @@
     
     // since ELCAssetTablePicker never pushes another view controller onto its navigation controller,
     // disappearing always means being popped
-    [self updateSelected];
+    // [self updateSelected];
     
     self.assetGroup = nil;
     self.parent = nil;
@@ -177,9 +176,16 @@
 
 - (void)assetSelected:(ELCAsset*)asset
 {
-    //    NSLog(@"total selected assets: %i", [self totalSelectedAssets]);
-    
-    int totalSelectedAssets = [self totalSelectedAssets];
+    if (asset.selected)
+    {
+        [parent select:asset.url];
+    }
+    else
+    {
+        [parent deselect:asset.url];
+    }
+
+    int totalSelectedAssets = [parent totalSelected];
     
     if (totalSelectedAssets == 0) {
         self.navigationItem.title = @"Select Photos";
@@ -268,29 +274,8 @@
 }
 
 
-- (void)updateSelected
-{
-    dispatch_once(&updateSelectedToken, ^{
-        NSMutableArray *selected = [[NSMutableArray alloc] init];
-        NSMutableArray *unselected = [[NSMutableArray alloc] initWithCapacity:self.elcAssets.count];
-        
-        for(ELCAsset *elcAsset in self.elcAssets)
-        {
-            //ALAsset *asset = elcAsset.asset;
-            if([elcAsset selected]) {
-                [selected addObject:elcAsset.url];
-            } else {
-                [unselected addObject:elcAsset.url];
-            }
-        }
-        
-        [(ELCAlbumPickerController*)self.parent updateAssetsSelected:selected unselected:unselected];
-    });
-}
-
 - (void)doneAction:(id)sender
 {
-    [self updateSelected];
     [(ELCAlbumPickerController*)self.parent finishPicking];
 }
 
@@ -411,23 +396,6 @@
             return 79;            
         }
     }
-}
-
-- (int)totalSelectedAssets {
-    
-    int count = 0;
-    
-    // self.elcAssets may be getting mutated on bg thread so make a copy
-    NSArray *tempAssets = [self.elcAssets copy];
-    for(ELCAsset *asset in tempAssets)
-    {
-        if(asset.selected)
-        {
-            count++;
-        }
-    }
-    
-    return count;
 }
 
 @end
