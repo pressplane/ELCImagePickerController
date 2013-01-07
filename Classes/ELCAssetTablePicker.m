@@ -17,6 +17,13 @@
 @interface ELCAssetTablePicker() {
     BOOL controllerIsDisappearing;
     int _previousSelectionCount;
+
+    // When first loading the view, the original code scrolled to the
+    // bottom (the most recent images). This is good, but if a
+    // resetAssetGroup is triggered, it's annoying, b/c you may have
+    // scrolled up by then. Use this flag to suppress the scrolling
+    // when we have to reload assets.
+    BOOL _dontRepositionScolling;
 }
 
 - (void)scrollTableViewToBottom;
@@ -36,6 +43,7 @@
 - (void)resetAssetGroup:(ALAssetsGroup *)newAssetsGroup
 {
     self.assetGroup = newAssetsGroup;
+    _dontRepositionScolling = true;
     [self.tableView reloadData];
     [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
@@ -142,7 +150,7 @@
                 NSInteger currentAssetCount = self.elcAssets.count;
                 if (currentAssetCount <= numberToLoad) {
                     // if we just finished doing the first row, scroll to it
-                    if (currentAssetCount == assetsPerRow) {
+                    if (currentAssetCount == assetsPerRow && !_dontRepositionScolling) {
                         [self performSelectorOnMainThread:@selector(scrollTableViewToBottom) withObject:nil waitUntilDone:YES];
                     }
                     
