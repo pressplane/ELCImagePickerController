@@ -14,23 +14,24 @@
 	ALAsset *_asset;
         NSURL *url;
 	UIImageView *overlayView;
-	BOOL selected;
+	//BOOL selected;
 	id parent;
 }
 
 //@property (nonatomic) ALAsset *asset;
 @property (nonatomic) NSURL *url;
 @property (nonatomic, unsafe_unretained) id<ELCAssetProtocol> delegate;
-@property (nonatomic) BOOL selected;
+//@property (nonatomic) BOOL selected;
 @property (nonatomic, strong) UIImage *thumbnail;
 
 -(id)initWithAsset:(ALAsset*)_asset;
 - (void)toggleSelected;
+-(BOOL)isSelected;
 @end
 
 @protocol ELCAssetProtocol <NSObject>
+- (BOOL)isSelected:(NSURL*)assetUrl;
 
 @optional
-- (void)assetSelected:(ELCAsset*)asset;
-
+- (void)assetSelected:(ELCAsset*)asset selected:(BOOL)selected;
 @end

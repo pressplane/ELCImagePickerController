@@ -14,7 +14,7 @@
 @synthesize delegate;
 
 @synthesize thumbnail;
-@synthesize selected;
+// @synthesize selected;
 
 -(id)initWithAsset:(ALAsset*)asset {
 	
@@ -28,12 +28,19 @@
 
 - (void)toggleSelected
 {
-    selected = !selected;
+    // selected = !selected;
     
-    if ([self.delegate respondsToSelector:@selector(assetSelected:)]) {
-        [self.delegate assetSelected:self];
+    if ([self.delegate respondsToSelector:@selector(assetSelected:selected:)]) {
+        [self.delegate assetSelected:self selected:![self isSelected]];
     }
 }
+
+-(BOOL)isSelected
+{
+    return ([self.delegate respondsToSelector:@selector(isSelected:)]
+            && [self.delegate isSelected:self.url]);
+}
+
 
 - (UIImage *)thumbnail
 {

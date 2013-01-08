@@ -138,11 +138,15 @@
                 
                 ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
                 [elcAsset setDelegate:self];
-                    
+                
+                // CCF 01/07/13, changed this so that the elcAsset is
+                // calling back on this object's parent, which
+                // maintains the set of selected URLs
                 // Mark all the selected assets
-                if ([((ELCAlbumPickerController *)self.parent).alreadySelectedURLs containsObject:elcAsset.url]) {
-                    elcAsset.selected = YES;
-                }
+                // if ([self isSelected:elcAsset.url])
+                // {
+                //     elcAsset.selected = YES;
+                // }
                 
                 [self.elcAssets addObject:elcAsset];
                 
@@ -182,9 +186,14 @@
     }
 }
 
-- (void)assetSelected:(ELCAsset*)asset
+- (BOOL)isSelected:(NSURL*)assetUrl
 {
-    if (asset.selected)
+    return [((ELCAlbumPickerController *)self.parent).alreadySelectedURLs containsObject:assetUrl];
+}
+
+- (void)assetSelected:(ELCAsset*)asset selected:(BOOL)selected
+{
+    if (selected)
     {
         [parent select:asset.url];
     }

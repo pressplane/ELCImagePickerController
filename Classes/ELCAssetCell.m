@@ -56,7 +56,7 @@
 		
 		UIImageView *overlayView = [[UIImageView alloc] initWithFrame:CGRectZero];
 		[overlayView setImage:[UIImage imageNamed:@"Overlay.png"]];
-		[overlayView setHidden:!asset.selected];
+		[overlayView setHidden:!asset.isSelected];
         overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         // add the overlay as a subview of the assetImageView, so gesture recognizers work regardless of whether the overlay is shown
 		[assetImageView addSubview:overlayView];
@@ -74,7 +74,7 @@
         ELCAsset *elcAsset = [self.rowAssets objectAtIndex:tappedIndex];
         [elcAsset toggleSelected];
 
-        overlayView.hidden = !elcAsset.selected;
+        overlayView.hidden = !elcAsset.isSelected;
     }
 }
 
